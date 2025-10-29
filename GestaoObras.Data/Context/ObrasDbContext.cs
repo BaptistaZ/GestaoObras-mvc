@@ -17,6 +17,6 @@ public class ObrasDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        // quando criarmos mapeamentos: modelBuilder.ApplyConfigurationsFromAssembly(typeof(ObrasDbContext).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ObrasDbContext).Assembly);
     }
 }
