@@ -20,7 +20,7 @@ public class MovimentoMaterialConfiguration : IEntityTypeConfiguration<Movimento
          .OnDelete(DeleteBehavior.Cascade);
 
         b.HasOne(x => x.Material)
-         .WithMany(m => m.MovimentosMaterial)
+         .WithMany(m => m.Movimentos)
          .HasForeignKey(x => x.MaterialId)
          .OnDelete(DeleteBehavior.Restrict);
 

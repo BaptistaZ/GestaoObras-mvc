@@ -12,7 +12,7 @@ public class MaterialConfiguration : IEntityTypeConfiguration<Material>
         b.HasKey(x => x.Id);
 
         b.Property(x => x.Nome).IsRequired().HasMaxLength(120);
-        b.Property(x => x.Descricao).IsRequired().HasMaxLength(500);
+        b.Property(x => x.Descricao).HasMaxLength(500);
         b.Property(x => x.StockDisponivel).IsRequired();
 
         b.HasIndex(x => x.Nome).IsUnique();
