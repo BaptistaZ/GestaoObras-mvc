@@ -2,6 +2,6 @@ namespace GestaoObras.Domain.Enums;
 
 public enum OperacaoStock
 {
-    Add = 1,
-    Remove = 2
+    Entrada = 1,
+    Saida = 2
 }

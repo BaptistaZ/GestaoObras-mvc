@@ -20,9 +20,47 @@ namespace GestaoObras.Web.Controllers
         }
 
         // GET: Clientes
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(
+            string? search,
+            string sort = "nome_asc",
+            int page = 1,
+            int pageSize = 10)
         {
-            return View(await _context.Clientes.ToListAsync());
+            // base query
+            var q = _context.Clientes.AsNoTracking();
+
+            // filtro (pesquisa por nome, email, telemóvel)
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var s = search.Trim();
+                q = q.Where(c =>
+                    EF.Functions.ILike(c.Nome, $"%{s}%") ||
+                    EF.Functions.ILike(c.Email ?? "", $"%{s}%") ||
+                    EF.Functions.ILike(c.Telefone ?? "", $"%{s}%"));
+            }
+
+            // ordenação
+            q = sort switch
+            {
+                "nome_desc" => q.OrderByDescending(c => c.Nome),
+                "email_asc" => q.OrderBy(c => c.Email),
+                "email_desc" => q.OrderByDescending(c => c.Email),
+                _ => q.OrderBy(c => c.Nome) // nome_asc (default)
+            };
+
+            // paginação
+            var total = await q.CountAsync();
+            var items = await q.Skip((page - 1) * pageSize)
+                               .Take(pageSize)
+                               .ToListAsync();
+
+            ViewBag.Search = search;
+            ViewBag.Sort = sort;
+            ViewBag.Page = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.Total = total;
+
+            return View(items);
         }
 
         // GET: Clientes/Details/5

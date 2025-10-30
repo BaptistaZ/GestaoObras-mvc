@@ -9,6 +9,7 @@ var cs = builder.Configuration.GetConnectionString("ObrasDb")
 builder.Services.AddDbContext<ObrasDbContext>(opt => opt.UseNpgsql(cs));
 
 var app = builder.Build();
+await GestaoObras.Web.Seed.DataSeeder.SeedAsync(app);
 // pipeline default do template…
 if (!app.Environment.IsDevelopment()) { app.UseExceptionHandler("/Home/Error"); app.UseHsts(); }
 app.UseHttpsRedirection();
