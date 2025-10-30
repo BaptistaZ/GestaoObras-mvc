@@ -59,14 +59,24 @@ namespace GestaoObras.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,ObraId,MaterialId,Quantidade,DataHora,Operacao")] MovimentoMaterial movimentoMaterial)
+        public async Task<IActionResult> Create(
+    [Bind("Id,ObraId,MaterialId,Quantidade,DataHora,Operacao")] MovimentoMaterial movimentoMaterial,
+    string? returnUrl)
         {
+            if (movimentoMaterial.DataHora == default)
+                movimentoMaterial.DataHora = DateTime.Now;
+
             if (ModelState.IsValid)
             {
                 _context.Add(movimentoMaterial);
                 await _context.SaveChangesAsync();
+
+                if (!string.IsNullOrWhiteSpace(returnUrl))
+                    return Redirect(returnUrl);
+
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["MaterialId"] = new SelectList(_context.Materiais, "Id", "Nome", movimentoMaterial.MaterialId);
             ViewData["ObraId"] = new SelectList(_context.Obras, "Id", "Descricao", movimentoMaterial.ObraId);
             return View(movimentoMaterial);

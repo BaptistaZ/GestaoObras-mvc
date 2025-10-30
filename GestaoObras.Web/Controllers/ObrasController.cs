@@ -27,21 +27,19 @@ namespace GestaoObras.Web.Controllers
         }
 
         // GET: Obras/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var obra = await _context.Obras
                 .Include(o => o.Cliente)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (obra == null)
-            {
-                return NotFound();
-            }
+                .Include(o => o.MovimentosMaterial).ThenInclude(m => m.Material)
+                .Include(o => o.MaosDeObra)
+                .Include(o => o.Pagamentos)
+                .FirstOrDefaultAsync(o => o.Id == id);
 
+            if (obra == null) return NotFound();
+
+            // Prepara dropdowns para os forms rápidos
+            ViewBag.MaterialId = new SelectList(_context.Materiais.OrderBy(m => m.Nome), "Id", "Nome");
             return View(obra);
         }
 
