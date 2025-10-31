@@ -4,131 +4,149 @@
     ViewData["Title"] = "Clientes";
 
     // Estado vindo do Controller (ViewBag)
-    var search = ViewBag.Search as string;
-    var sort = (ViewBag.Sort as string) ?? "nome_asc";
-    int page = ViewBag.Page ?? 1;
+    var search   = ViewBag.Search as string;
+    var sort     = (ViewBag.Sort as string) ?? "nome_asc";
+    int page     = ViewBag.Page     ?? 1;
     int pageSize = ViewBag.PageSize ?? 10;
-    int total = ViewBag.Total ?? 0;
-    int totalPages = (int)Math.Ceiling((double)total / pageSize);
+    int total    = ViewBag.Total    ?? 0;
+
+    // Segurança contra zeros/valores absurdos
+    pageSize    = Math.Max(1, pageSize);
+    page        = Math.Max(1, page);
+    int totalPages = Math.Max(1, (int)Math.Ceiling((double)total / pageSize));
 
     // Próximas direções de ordenação nas colunas
     string nextSortNome = sort == "nome_asc" ? "nome_desc" : "nome_asc";
-    string nextSortNif = sort == "nif_asc" ? "nif_desc" : "nif_asc";
+    string nextSortNif  = sort == "nif_asc"  ? "nif_desc"  : "nif_asc";
+
+    // Para DisplayNameFor com segurança
+    var firstItem = Model.FirstOrDefault();
 }
 
-<h1 class="mb-3">Clientes</h1>
-
-<div class="card mb-3">
-    <div class="card-body">
-        <form method="get" class="row g-2 align-items-end">
-            <div class="col-sm-5">
-                <label class="form-label" for="search">Pesquisar</label>
-                <input class="form-control" type="text" id="search" name="search" value="@search"
-                    placeholder="Nome, Email, Telefone ou NIF..." />
-            </div>
-
-            <div class="col-sm-3">
-                <label class="form-label" for="sort">Ordenar por</label>
-                <select class="form-select" id="sort" name="sort">
-                    <option value="nome_asc" selected="@(sort == "nome_asc")">Nome (A→Z)</option>
-                    <option value="nome_desc" selected="@(sort == "nome_desc")">Nome (Z→A)</option>
-                    <option value="nif_asc" selected="@(sort == "nif_asc")">NIF (↑)</option>
-                    <option value="nif_desc" selected="@(sort == "nif_desc")">NIF (↓)</option>
-                </select>
-            </div>
-
-            <div class="col-sm-2">
-                <label class="form-label" for="pageSize">Por página</label>
-                <select class="form-select" id="pageSize" name="pageSize">
-                    <option value="10" selected="@(pageSize == 10)">10</option>
-                    <option value="25" selected="@(pageSize == 25)">25</option>
-                    <option value="50" selected="@(pageSize == 50)">50</option>
-                </select>
-            </div>
-
-            <div class="col-sm-2 d-grid">
-                <button class="btn btn-primary" type="submit">Aplicar</button>
-            </div>
-        </form>
+<div class="card card-outline card-primary">
+  <div class="card-header d-flex align-items-center gap-2">
+    <h3 class="card-title mb-0">Lista de Clientes</h3>
+    <div class="ms-auto">
+      <a asp-action="Create" class="btn btn-success btn-sm">
+        <i class="fa-solid fa-plus"></i> Novo Cliente
+      </a>
     </div>
-</div>
+  </div>
 
-<p>
-    <a class="btn btn-success" asp-action="Create">+ Novo Cliente</a>
-</p>
+  <div class="card-body">
+    <!-- filtros -->
+    <form method="get" class="row g-2 mb-3">
+      <div class="col-12 col-md-6">
+        <label class="form-label" for="search">Pesquisar</label>
+        <input class="form-control" id="search" name="search"
+               value="@search" placeholder="Nome, Email, Telefone ou NIF..." />
+      </div>
 
-@if (!Model.Any())
-{
-    <div class="alert alert-info">Sem resultados.</div>
-}
-else
-{
-    <table class="table table-striped table-hover align-middle">
-        <thead>
+      <div class="col-6 col-md-3">
+        <label class="form-label" for="sort">Ordenar por</label>
+        <select class="form-select" id="sort" name="sort">
+          <option value="nome_asc"  selected="@(sort == "nome_asc")">Nome (A→Z)</option>
+          <option value="nome_desc" selected="@(sort == "nome_desc")">Nome (Z→A)</option>
+          <option value="nif_asc"   selected="@(sort == "nif_asc")">NIF (↑)</option>
+          <option value="nif_desc"  selected="@(sort == "nif_desc")">NIF (↓)</option>
+        </select>
+      </div>
+
+      <div class="col-6 col-md-2">
+        <label class="form-label" for="pageSize">Por página</label>
+        <select class="form-select" id="pageSize" name="pageSize">
+          <option value="10" selected="@(pageSize == 10)">10</option>
+          <option value="25" selected="@(pageSize == 25)">25</option>
+          <option value="50" selected="@(pageSize == 50)">50</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-md-1 d-grid">
+        <button class="btn btn-primary" type="submit">Aplicar</button>
+      </div>
+    </form>
+
+    @if (!Model.Any())
+    {
+      <div class="alert alert-info mb-0">Sem resultados.</div>
+    }
+    else
+    {
+      <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+          <thead class="table-light">
             <tr>
-                <th>
-                    <a asp-action="Index" asp-route-search="@search" asp-route-sort="@nextSortNome" asp-route-page="1"
-                        asp-route-pageSize="@(pageSize)">
-                        @Html.DisplayNameFor(m => m.First().Nome)
-                        @(sort.StartsWith("nome_") ? (sort.EndsWith("_asc") ? " ↑" : " ↓") : "")
-                    </a>
-                </th>
-                <th>
-                    <a asp-action="Index" asp-route-search="@search" asp-route-sort="@nextSortNif" asp-route-page="1"
-                        asp-route-pageSize="@(pageSize)">
-                        @Html.DisplayNameFor(m => m.First().NIF)
-                        @(sort.StartsWith("nif_") ? (sort.EndsWith("_asc") ? " ↑" : " ↓") : "")
-                    </a>
-                </th>
-                <th>@Html.DisplayNameFor(m => m.First().Morada)</th>
-                <th>@Html.DisplayNameFor(m => m.First().Email)</th>
-                <th>@Html.DisplayNameFor(m => m.First().Telefone)</th>
-                <th style="width:180px;"></th>
+              <th>
+                <a asp-action="Index" asp-route-search="@search"
+                   asp-route-sort="@nextSortNome" asp-route-page="1"
+                   asp-route-pageSize="@pageSize">
+                  @Html.DisplayNameFor(m => firstItem.Nome)
+                  @(sort.StartsWith("nome_") ? (sort.EndsWith("_asc") ? " ↑" : " ↓") : "")
+                </a>
+              </th>
+              <th>
+                <a asp-action="Index" asp-route-search="@search"
+                   asp-route-sort="@nextSortNif" asp-route-page="1"
+                   asp-route-pageSize="@pageSize">
+                  @Html.DisplayNameFor(m => firstItem.NIF)
+                  @(sort.StartsWith("nif_") ? (sort.EndsWith("_asc") ? " ↑" : " ↓") : "")
+                </a>
+              </th>
+              <th>@Html.DisplayNameFor(m => firstItem.Morada)</th>
+              <th>@Html.DisplayNameFor(m => firstItem.Email)</th>
+              <th>@Html.DisplayNameFor(m => firstItem.Telefone)</th>
+              <th class="text-end" style="width:180px;">Ações</th>
             </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.Nome</td>
-                    <td>@item.NIF</td>
-                    <td>@item.Morada</td>
-                    <td>@item.Email</td>
-                    <td>@item.Telefone</td>
-                    <td class="text-nowrap">
-                        <a class="btn btn-sm btn-outline-primary" asp-action="Edit" asp-route-id="@item.Id">Editar</a>
-                        <a class="btn btn-sm btn-outline-secondary" asp-action="Details" asp-route-id="@item.Id">Detalhes</a>
-                        <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@item.Id">Apagar</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+          </thead>
+          <tbody>
+          @foreach (var item in Model)
+          {
+            <tr>
+              <td>@item.Nome</td>
+              <td>@item.NIF</td>
+              <td>@item.Morada</td>
+              <td>@item.Email</td>
+              <td>@item.Telefone</td>
+              <td class="text-end text-nowrap">
+                <a class="btn btn-sm btn-outline-primary"   asp-action="Edit"    asp-route-id="@item.Id">Editar</a>
+                <a class="btn btn-sm btn-outline-secondary" asp-action="Details" asp-route-id="@item.Id">Detalhes</a>
+                <a class="btn btn-sm btn-outline-danger"    asp-action="Delete"  asp-route-id="@item.Id">Apagar</a>
+              </td>
+            </tr>
+          }
+          </tbody>
+        </table>
+      </div>
 
-    <!-- Paginação -->
-    <nav aria-label="Paginação">
-        <ul class="pagination">
-            <li class="page-item @((page <= 1) ? "disabled" : "")">
-                <a class="page-link" asp-action="Index" asp-route-search="@search" asp-route-sort="@sort"
-                    asp-route-page="@(page - 1)" asp-route-pageSize="@(pageSize)">Anterior</a>
+      <!-- Paginação -->
+      <nav aria-label="Paginação">
+        <ul class="pagination mb-0">
+          <li class="page-item @((page <= 1) ? "disabled" : "")">
+            <a class="page-link"
+               asp-action="Index" asp-route-search="@search" asp-route-sort="@sort"
+               asp-route-page="@(page - 1)" asp-route-pageSize="@pageSize">Anterior</a>
+          </li>
+
+          @for (int i = 1; i <= totalPages; i++)
+          {
+            <li class="page-item @(i == page ? "active" : "")">
+              <a class="page-link"
+                 asp-action="Index" asp-route-search="@search" asp-route-sort="@sort"
+                 asp-route-page="@i" asp-route-pageSize="@pageSize">@i</a>
             </li>
+          }
 
-            @for (int i = 1; i <= totalPages; i++)
-            {
-                <li class="page-item @(i == page ? "active" : "")">
-                    <a class="page-link" asp-action="Index" asp-route-search="@search" asp-route-sort="@sort"
-                        asp-route-page="@(i)" asp-route-pageSize="@(pageSize)">@i</a>
-                </li>
-            }
-
-            <li class="page-item @((page >= totalPages) ? "disabled" : "")">
-                <a class="page-link" asp-action="Index" asp-route-search="@search" asp-route-sort="@sort"
-                    asp-route-page="@(page + 1)" asp-route-pageSize="@(pageSize)">Seguinte</a>
-            </li>
+          <li class="page-item @((page >= totalPages) ? "disabled" : "")">
+            <a class="page-link"
+               asp-action="Index" asp-route-search="@search" asp-route-sort="@sort"
+               asp-route-page="@(page + 1)" asp-route-pageSize="@pageSize">Seguinte</a>
+          </li>
         </ul>
-    </nav>
+      </nav>
 
-    <div class="text-muted">
+      <div class="text-muted mt-2">
         Mostrando página @(page) de @totalPages (@total registos)
-    </div>
-}
+      </div>
+    }
+  </div>
+</div>

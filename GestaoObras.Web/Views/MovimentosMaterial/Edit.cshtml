@@ -1,54 +1,65 @@
 @model GestaoObras.Domain.Entities.MovimentoMaterial
+@using GestaoObras.Domain.Enums
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar Movimento";
 }
 
-<h1>Edit</h1>
+<div class="card card-outline card-primary">
+  <div class="card-header">
+    <h3 class="card-title mb-0">Editar Movimento</h3>
+  </div>
 
-<h4>MovimentoMaterial</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="All" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="ObraId" class="control-label"></label>
-                <select asp-for="ObraId" class="form-control" asp-items="ViewBag.ObraId"></select>
-                <span asp-validation-for="ObraId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MaterialId" class="control-label"></label>
-                <select asp-for="MaterialId" class="form-control" asp-items="ViewBag.MaterialId"></select>
-                <span asp-validation-for="MaterialId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Quantidade" class="control-label"></label>
-                <input asp-for="Quantidade" class="form-control" />
-                <span asp-validation-for="Quantidade" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DataHora" class="control-label"></label>
-                <input asp-for="DataHora" class="form-control" />
-                <span asp-validation-for="DataHora" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Operacao" class="control-label"></label>
-                <select asp-for="Operacao" class="form-control"></select>
-                <span asp-validation-for="Operacao" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
+  <div class="card-body">
+    <form asp-action="Edit" class="row g-3">
+      <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+      <input type="hidden" asp-for="Id" />
 
-<div>
-    <a asp-action="Index">Back to List</a>
+      <div class="col-md-6">
+        <label asp-for="ObraId" class="form-label"></label>
+        <select asp-for="ObraId" class="form-select" asp-items="ViewBag.ObraId"></select>
+        <span asp-validation-for="ObraId" class="text-danger"></span>
+      </div>
+
+      <div class="col-md-6">
+        <label asp-for="MaterialId" class="form-label"></label>
+        <select asp-for="MaterialId" class="form-select" asp-items="ViewBag.MaterialId"></select>
+        <span asp-validation-for="MaterialId" class="text-danger"></span>
+      </div>
+
+      <div class="col-md-4">
+        <label asp-for="Operacao" class="form-label"></label>
+        <select asp-for="Operacao" class="form-select"
+                asp-items="Html.GetEnumSelectList<OperacaoStock>()"></select>
+        <span asp-validation-for="Operacao" class="text-danger"></span>
+      </div>
+
+      <div class="col-md-4">
+        <label asp-for="Quantidade" class="form-label"></label>
+        <input asp-for="Quantidade" class="form-control" min="1" />
+        <span asp-validation-for="Quantidade" class="text-danger"></span>
+      </div>
+
+      <div class="col-md-4">
+        <label asp-for="DataHora" class="form-label"></label>
+        <input class="form-control" type="datetime-local"
+               value="@(Model.DataHora.ToString("yyyy-MM-ddTHH:mm"))"
+               name="DataHora" id="DataHora" />
+        <span asp-validation-for="DataHora" class="text-danger"></span>
+      </div>
+
+      <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+          <i class="fa-solid fa-floppy-disk"></i> Guardar
+        </button>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+          <i class="fa-solid fa-arrow-left"></i> Voltar
+        </a>
+      </div>
+    </form>
+  </div>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+  <partial name="_ValidationScriptsPartial" />
 }

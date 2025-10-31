@@ -1,48 +1,45 @@
 @model GestaoObras.Domain.Entities.MovimentoMaterial
+@using GestaoObras.Domain.Enums
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalhes do Movimento";
+    string BadgeForOperacao(OperacaoStock op) =>
+        op == OperacaoStock.Entrada ? "bg-primary"
+      : op == OperacaoStock.Saida   ? "bg-warning text-dark"
+      : "bg-secondary";
 }
 
-<h1>Details</h1>
+<div class="card card-outline card-info">
+  <div class="card-header d-flex align-items-center gap-2">
+    <h3 class="card-title mb-0">Detalhes do Movimento</h3>
+    <div class="ms-auto">
+      <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary btn-sm">
+        <i class="fa-solid fa-pen-to-square"></i> Editar
+      </a>
+      <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+        <i class="fa-solid fa-arrow-left"></i> Voltar
+      </a>
+    </div>
+  </div>
 
-<div>
-    <h4>MovimentoMaterial</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Quantidade)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Quantidade)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DataHora)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DataHora)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Operacao)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Operacao)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Obra)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Obra.Descricao)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Material)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Material.Nome)
-        </dd>
+  <div class="card-body">
+    <dl class="row mb-0">
+      <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Obra)</dt>
+      <dd class="col-sm-9">@Model?.Obra?.Descricao</dd>
+
+      <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Material)</dt>
+      <dd class="col-sm-9">@Model?.Material?.Nome</dd>
+
+      <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Operacao)</dt>
+      <dd class="col-sm-9">
+        <span class="badge @BadgeForOperacao(Model.Operacao)">@Model.Operacao</span>
+      </dd>
+
+      <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Quantidade)</dt>
+      <dd class="col-sm-9">@Model.Quantidade</dd>
+
+      <dt class="col-sm-3">@Html.DisplayNameFor(m => m.DataHora)</dt>
+      <dd class="col-sm-9">@Model.DataHora.ToString("dd/MM/yyyy HH:mm")</dd>
     </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+  </div>
 </div>

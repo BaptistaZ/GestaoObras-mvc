@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -22,12 +21,12 @@ namespace GestaoObras.Web.Controllers
         // GET: Obras
         public async Task<IActionResult> Index()
         {
-            var obrasDbContext = _context.Obras.Include(o => o.Cliente);
-            return View(await obrasDbContext.ToListAsync());
+            var query = _context.Obras.Include(o => o.Cliente);
+            return View(await query.ToListAsync());
         }
 
         // GET: Obras/Details/5
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id, string? tab = null)
         {
             var obra = await _context.Obras
                 .Include(o => o.Cliente)
@@ -38,8 +37,17 @@ namespace GestaoObras.Web.Controllers
 
             if (obra == null) return NotFound();
 
-            // Prepara dropdowns para os forms rápidos
-            ViewBag.MaterialId = new SelectList(_context.Materiais.OrderBy(m => m.Nome), "Id", "Nome");
+            ViewBag.ActiveTab = tab;
+
+            // Para o dropdown de materiais (form "Novo movimento")
+            ViewBag.MaterialId = new SelectList(
+                await _context.Materiais.OrderBy(m => m.Nome).ToListAsync(),
+                "Id", "Nome"
+            );
+
+            // URL atual (inclui ?tab=...) para voltar após guardar no Edit
+            ViewBag.CurrentUrl = HttpContext?.Request?.Path + HttpContext?.Request?.QueryString;
+
             return View(obra);
         }
 
@@ -51,90 +59,80 @@ namespace GestaoObras.Web.Controllers
         }
 
         // POST: Obras/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nome,Descricao,ClienteId,Morada,Latitude,Longitude,Ativa")] Obra obra)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Add(obra);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Email", obra.ClienteId);
+                return View(obra);
             }
-            ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Email", obra.ClienteId);
-            return View(obra);
+
+            _context.Add(obra);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Obras/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int? id, string? returnUrl = null)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var obra = await _context.Obras.FindAsync(id);
-            if (obra == null)
-            {
-                return NotFound();
-            }
+            if (obra == null) return NotFound();
+
             ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Email", obra.ClienteId);
+            ViewBag.ReturnUrl = returnUrl;
             return View(obra);
         }
 
         // POST: Obras/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Descricao,ClienteId,Morada,Latitude,Longitude,Ativa")] Obra obra)
+        public async Task<IActionResult> Edit(
+            int id,
+            [Bind("Id,Nome,Descricao,ClienteId,Morada,Latitude,Longitude,Ativa")] Obra obra,
+            string? returnUrl)
         {
-            if (id != obra.Id)
+            if (id != obra.Id) return NotFound();
+
+            if (!ModelState.IsValid)
             {
-                return NotFound();
+                ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Email", obra.ClienteId);
+                ViewBag.ReturnUrl = returnUrl;
+                return View(obra);
             }
 
-            if (ModelState.IsValid)
+            try
             {
-                try
-                {
-                    _context.Update(obra);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ObraExists(obra.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                _context.Update(obra);
+                await _context.SaveChangesAsync();
             }
-            ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Email", obra.ClienteId);
-            return View(obra);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Obras.Any(e => e.Id == obra.Id)) return NotFound();
+                throw;
+            }
+
+            // Prioridade ao returnUrl (mantém a mesma aba dos detalhes)
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return LocalRedirect(returnUrl);
+
+            // Fallback
+            return RedirectToAction("Details", new { id = obra.Id });
         }
 
         // GET: Obras/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var obra = await _context.Obras
                 .Include(o => o.Cliente)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (obra == null)
-            {
-                return NotFound();
-            }
+
+            if (obra == null) return NotFound();
 
             return View(obra);
         }
@@ -148,15 +146,11 @@ namespace GestaoObras.Web.Controllers
             if (obra != null)
             {
                 _context.Obras.Remove(obra);
+                await _context.SaveChangesAsync();
             }
-
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ObraExists(int id)
-        {
-            return _context.Obras.Any(e => e.Id == id);
-        }
+        private bool ObraExists(int id) => _context.Obras.Any(e => e.Id == id);
     }
 }

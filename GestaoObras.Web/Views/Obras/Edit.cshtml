@@ -1,64 +1,89 @@
 @model GestaoObras.Domain.Entities.Obra
-
 @{
-    ViewData["Title"] = "Edit";
+  ViewData["Title"] = "Editar Obra";
+  var returnUrl = ViewBag.ReturnUrl as string;
 }
 
-<h1>Edit</h1>
+<div class="card card-outline card-primary">
+  <div class="card-header">
+    <h3 class="card-title mb-0">Editar Obra</h3>
+  </div>
 
-<h4>Obra</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="All" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Nome" class="control-label"></label>
-                <input asp-for="Nome" class="form-control" />
-                <span asp-validation-for="Nome" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Descricao" class="control-label"></label>
-                <input asp-for="Descricao" class="form-control" />
-                <span asp-validation-for="Descricao" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ClienteId" class="control-label"></label>
-                <select asp-for="ClienteId" class="form-control" asp-items="ViewBag.ClienteId"></select>
-                <span asp-validation-for="ClienteId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Morada" class="control-label"></label>
-                <input asp-for="Morada" class="form-control" />
-                <span asp-validation-for="Morada" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Latitude" class="control-label"></label>
-                <input asp-for="Latitude" class="form-control" />
-                <span asp-validation-for="Latitude" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Longitude" class="control-label"></label>
-                <input asp-for="Longitude" class="form-control" />
-                <span asp-validation-for="Longitude" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Ativa" /> @Html.DisplayNameFor(model => model.Ativa)
-                </label>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
+  <div class="card-body">
+    <form asp-action="Edit" class="row g-3">
+      @Html.AntiForgeryToken()
+      <input type="hidden" name="returnUrl" value="@returnUrl" />
+      <input type="hidden" asp-for="Id" />
 
-<div>
-    <a asp-action="Index">Back to List</a>
+      <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+      <div class="col-md-6">
+        <label asp-for="Nome" class="form-label"></label>
+        <input asp-for="Nome" class="form-control" />
+        <span asp-validation-for="Nome" class="text-danger"></span>
+      </div>
+
+      <div class="col-md-6">
+        <label asp-for="Descricao" class="form-label"></label>
+        <input asp-for="Descricao" class="form-control" />
+        <span asp-validation-for="Descricao" class="text-danger"></span>
+      </div>
+
+      <div class="col-md-6">
+        <label asp-for="ClienteId" class="form-label"></label>
+        <select asp-for="ClienteId" class="form-select" asp-items="ViewBag.ClienteId"></select>
+        <span asp-validation-for="ClienteId" class="text-danger"></span>
+      </div>
+
+      <div class="col-md-6">
+        <label asp-for="Morada" class="form-label"></label>
+        <input asp-for="Morada" class="form-control" />
+        <span asp-validation-for="Morada" class="text-danger"></span>
+      </div>
+
+      <div class="col-md-3">
+        <label asp-for="Latitude" class="form-label"></label>
+        <input asp-for="Latitude" class="form-control" />
+        <span asp-validation-for="Latitude" class="text-danger"></span>
+      </div>
+
+      <div class="col-md-3">
+        <label asp-for="Longitude" class="form-label"></label>
+        <input asp-for="Longitude" class="form-control" />
+        <span asp-validation-for="Longitude" class="text-danger"></span>
+      </div>
+
+      <div class="col-12">
+        <div class="form-check">
+          <input class="form-check-input" asp-for="Ativa" />
+          <label class="form-check-label" asp-for="Ativa"></label>
+        </div>
+        <span asp-validation-for="Ativa" class="text-danger"></span>
+      </div>
+
+      <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+          <i class="fa-solid fa-floppy-disk"></i> Guardar
+        </button>
+
+        @* Botão Voltar inteligente *@
+        @if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+        {
+            <a href="@returnUrl" class="btn btn-outline-secondary">
+              <i class="fa-solid fa-arrow-left"></i> Voltar
+            </a>
+        }
+        else
+        {
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
+              <i class="fa-solid fa-arrow-left"></i> Voltar
+            </a>
+        }
+      </div>
+    </form>
+  </div>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+  <partial name="_ValidationScriptsPartial" />
 }

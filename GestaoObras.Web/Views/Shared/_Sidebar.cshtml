@@ -1,0 +1,39 @@
+<aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+  <div class="sidebar-header">
+    <a asp-controller="Home" asp-action="Index" class="brand-link">
+      <span class="brand-text fw-light">Gestão de Obras</span>
+    </a>
+  </div>
+
+  <div class="sidebar-wrapper">
+    <nav class="mt-2">
+      <ul class="nav nav-pills nav-sidebar flex-column" role="menu">
+        <li class="nav-item">
+          <a asp-controller="Home" asp-action="Index" class="nav-link">
+            <i class="nav-icon fa-solid fa-gauge"></i> <p>Dashboard</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a asp-controller="Clientes" asp-action="Index" class="nav-link">
+            <i class="nav-icon fa-solid fa-users"></i> <p>Clientes</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a asp-controller="Materiais" asp-action="Index" class="nav-link">
+            <i class="nav-icon fa-solid fa-boxes-stacked"></i> <p>Materiais</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a asp-controller="Obras" asp-action="Index" class="nav-link">
+            <i class="nav-icon fa-solid fa-building"></i> <p>Obras</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a asp-controller="MovimentosMaterial" asp-action="Index" class="nav-link">
+            <i class="nav-icon fa-solid fa-right-left"></i> <p>Movimentos</p>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</aside>

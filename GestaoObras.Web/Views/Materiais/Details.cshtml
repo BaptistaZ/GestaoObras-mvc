@@ -1,36 +1,32 @@
 @model GestaoObras.Domain.Entities.Material
-
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalhes do Material";
 }
 
-<h1>Details</h1>
+<div class="card card-outline card-info">
+  <div class="card-header">
+    <h3 class="card-title mb-0">Detalhes do Material</h3>
+  </div>
 
-<div>
-    <h4>Material</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Nome)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Nome)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Descricao)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Descricao)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StockDisponivel)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StockDisponivel)
-        </dd>
+  <div class="card-body">
+    <dl class="row mb-0">
+      <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Nome)</dt>
+      <dd class="col-sm-9">@Html.DisplayFor(m => m.Nome)</dd>
+
+      <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Descricao)</dt>
+      <dd class="col-sm-9">@Html.DisplayFor(m => m.Descricao)</dd>
+
+      <dt class="col-sm-3">@Html.DisplayNameFor(m => m.StockDisponivel)</dt>
+      <dd class="col-sm-9">@Html.DisplayFor(m => m.StockDisponivel)</dd>
     </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+  </div>
+
+  <div class="card-footer d-flex gap-2">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+      <i class="fa-solid fa-pen-to-square"></i> Editar
+    </a>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+      <i class="fa-solid fa-arrow-left"></i> Voltar
+    </a>
+  </div>
 </div>

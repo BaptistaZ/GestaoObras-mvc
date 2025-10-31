@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using GestaoObras.Data.Context;
 using GestaoObras.Domain.Entities;
@@ -19,156 +17,61 @@ namespace GestaoObras.Web.Controllers
             _context = context;
         }
 
-        // GET: MaosDeObra
-        public async Task<IActionResult> Index()
-        {
-            var obrasDbContext = _context.MaosDeObra.Include(m => m.Obra);
-            return View(await obrasDbContext.ToListAsync());
-        }
+        // Desativar páginas não usadas
+        [HttpGet] public IActionResult Index() => NotFound();
+        [HttpGet] public IActionResult Details(int id) => NotFound();
+        [HttpGet] public IActionResult Create() => NotFound();
+        [HttpGet] public IActionResult Edit(int id) => NotFound();
+        [HttpGet] public IActionResult Delete(int id) => NotFound();
 
-        // GET: MaosDeObra/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var maoDeObra = await _context.MaosDeObra
-                .Include(m => m.Obra)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (maoDeObra == null)
-            {
-                return NotFound();
-            }
-
-            return View(maoDeObra);
-        }
-
-        // GET: MaosDeObra/Create
-        public IActionResult Create()
-        {
-            ViewData["ObraId"] = new SelectList(_context.Obras, "Id", "Descricao");
-            return View();
-        }
-
-        // POST: MaosDeObra/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: MaosDeObra/Create (usado dentro de Obras/Details)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-    [Bind("Id,ObraId,Nome,HorasTrabalhadas,DataHora")] MaoDeObra maoDeObra,
-    string? returnUrl)
+            [Bind("ObraId,Nome,HorasTrabalhadas,DataHora")] MaoDeObra maoDeObra,
+            string? returnUrl)
         {
             if (maoDeObra.DataHora == default)
                 maoDeObra.DataHora = DateTime.Now;
 
-            if (ModelState.IsValid)
-            {
-                _context.Add(maoDeObra);
-                await _context.SaveChangesAsync();
+            if (!ModelState.IsValid)
+                return RedirectToObra(maoDeObra.ObraId, returnUrl, "mao");
 
-                if (!string.IsNullOrWhiteSpace(returnUrl))
-                    return Redirect(returnUrl);
+            _context.MaosDeObra.Add(maoDeObra);
+            await _context.SaveChangesAsync();
 
-                return RedirectToAction(nameof(Index));
-            }
-
-            ViewData["ObraId"] = new SelectList(_context.Obras, "Id", "Descricao", maoDeObra.ObraId);
-            return View(maoDeObra);
+            return RedirectToObra(maoDeObra.ObraId, returnUrl, "mao");
         }
 
-        // GET: MaosDeObra/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var maoDeObra = await _context.MaosDeObra.FindAsync(id);
-            if (maoDeObra == null)
-            {
-                return NotFound();
-            }
-            ViewData["ObraId"] = new SelectList(_context.Obras, "Id", "Descricao", maoDeObra.ObraId);
-            return View(maoDeObra);
-        }
-
-        // POST: MaosDeObra/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: MaosDeObra/DeleteConfirmed (usado dentro de Obras/Details)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,ObraId,Nome,HorasTrabalhadas,DataHora")] MaoDeObra maoDeObra)
+        public async Task<IActionResult> DeleteConfirmed(int id, string? returnUrl)
         {
-            if (id != maoDeObra.Id)
+            var mao = await _context.MaosDeObra.FindAsync(id);
+            if (mao != null)
             {
-                return NotFound();
+                var obraId = mao.ObraId;
+                _context.MaosDeObra.Remove(mao);
+                await _context.SaveChangesAsync();
+
+                return RedirectToObra(obraId, returnUrl, "mao");
             }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(maoDeObra);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!MaoDeObraExists(maoDeObra.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["ObraId"] = new SelectList(_context.Obras, "Id", "Descricao", maoDeObra.ObraId);
-            return View(maoDeObra);
+            return NotFound();
         }
 
-        // GET: MaosDeObra/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // Helper comum: redireciona sempre para a obra/tab correta
+        // Helper comum: redireciona sempre para a obra/tab correta
+        private IActionResult RedirectToObra(int obraId, string? returnUrl, string tab)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            // ⚠️ Garante que o returnUrl é mesmo local (evita loop se for nulo ou inválido)
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return LocalRedirect(returnUrl);
 
-            var maoDeObra = await _context.MaosDeObra
-                .Include(m => m.Obra)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (maoDeObra == null)
-            {
-                return NotFound();
-            }
-
-            return View(maoDeObra);
-        }
-
-        // POST: MaosDeObra/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var maoDeObra = await _context.MaosDeObra.FindAsync(id);
-            if (maoDeObra != null)
-            {
-                _context.MaosDeObra.Remove(maoDeObra);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool MaoDeObraExists(int id)
-        {
-            return _context.MaosDeObra.Any(e => e.Id == id);
+            // ✅ fallback automático: volta sempre para os detalhes da obra e aba certa
+            var url = Url.Action("Details", "Obras", new { id = obraId, tab });
+            return Redirect(url ?? "/Obras/Index");
         }
     }
 }

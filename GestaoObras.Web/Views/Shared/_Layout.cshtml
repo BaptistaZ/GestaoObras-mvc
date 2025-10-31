@@ -1,60 +1,56 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+<!DOCTYPE html>
+<html lang="pt-PT" data-bs-theme="light">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - GestaoObras.Web</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/GestaoObras.Web.styles.css" asp-append-version="true" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>@ViewData["Title"] - Gestão de Obras</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
+  <link rel="stylesheet" href="~/lib/fontawesome/css/all.min.css" asp-append-version="true" />
+  <link rel="stylesheet" href="~/lib/admin-lte/dist/css/adminlte.min.css" asp-append-version="true" />
+
+  @RenderSection("Styles", required: false)
 </head>
 
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">GestaoObras.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
-                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Clientes" asp-action="Index">Clientes</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Materiais" asp-action="Index">Materiais</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Obras" asp-action="Index">Obras</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="MovimentosMaterial"
-                                asp-action="Index">Movimentos</a>
-                        </li>
-                    </ul>
-                </div>
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+  <div class="app-wrapper">
+
+    @await Html.PartialAsync("_Navbar")   @* v4: app-header *@
+    @await Html.PartialAsync("_Sidebar")  @* v4: app-sidebar *@
+
+    <main class="app-main">
+      <div class="app-content-header">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col">
+              <h1 class="app-page-title">@ViewData["Title"]</h1>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - GestaoObras.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+          </div>
         </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/jquery-validation/dist/localization/messages_pt_PT.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
+      </div>
 
+      <div class="app-content">
+        <div class="container-fluid">
+          @RenderBody()
+        </div>
+      </div>
+    </main>
+
+    @await Html.PartialAsync("_Footer")
+  </div>
+
+  <!-- (Opcional) validação client-side do template MVC -->
+  <script src="~/lib/jquery/dist/jquery.min.js" asp-append-version="true"></script>
+  <script src="~/lib/jquery-validation/dist/jquery.validate.min.js" asp-append-version="true"></script>
+  <script src="~/lib/jquery-validation/dist/localization/messages_pt_PT.js" asp-append-version="true"></script>
+  <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js" asp-append-version="true"></script>
+
+  <!-- JS core -->
+  <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
+  <script src="~/lib/admin-lte/dist/js/adminlte.min.js" asp-append-version="true"></script>
+
+  @RenderSection("Scripts", required: false)
+</body>
 </html>

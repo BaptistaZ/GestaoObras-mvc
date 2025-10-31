@@ -1,48 +1,38 @@
 @model GestaoObras.Domain.Entities.Cliente
-
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalhes do Cliente";
 }
 
-<h1>Details</h1>
+<div class="card card-outline card-info">
+  <div class="card-header">
+    <h3 class="card-title mb-0">Detalhes do Cliente</h3>
+  </div>
 
-<div>
-    <h4>Cliente</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Nome)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Nome)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NIF)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NIF)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Morada)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Morada)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Telefone)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Telefone)
-        </dd>
+  <div class="card-body">
+    <dl class="row mb-0">
+      <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Nome)</dt>
+      <dd class="col-sm-9">@Html.DisplayFor(m => m.Nome)</dd>
+
+      <dt class="col-sm-3">@Html.DisplayNameFor(m => m.NIF)</dt>
+      <dd class="col-sm-9">@Html.DisplayFor(m => m.NIF)</dd>
+
+      <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Morada)</dt>
+      <dd class="col-sm-9">@Html.DisplayFor(m => m.Morada)</dd>
+
+      <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Email)</dt>
+      <dd class="col-sm-9">@Html.DisplayFor(m => m.Email)</dd>
+
+      <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Telefone)</dt>
+      <dd class="col-sm-9">@Html.DisplayFor(m => m.Telefone)</dd>
     </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+  </div>
+
+  <div class="card-footer d-flex gap-2">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+      <i class="fa-solid fa-pen-to-square"></i> Editar
+    </a>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+      <i class="fa-solid fa-arrow-left"></i> Voltar
+    </a>
+  </div>
 </div>

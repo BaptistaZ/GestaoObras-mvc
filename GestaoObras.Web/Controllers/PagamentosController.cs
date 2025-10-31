@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using GestaoObras.Data.Context;
 using GestaoObras.Domain.Entities;
@@ -19,156 +17,60 @@ namespace GestaoObras.Web.Controllers
             _context = context;
         }
 
-        // GET: Pagamentos
-        public async Task<IActionResult> Index()
-        {
-            var obrasDbContext = _context.Pagamentos.Include(p => p.Obra);
-            return View(await obrasDbContext.ToListAsync());
-        }
+        // Desativar páginas não usadas
+        [HttpGet] public IActionResult Index() => NotFound();
+        [HttpGet] public IActionResult Details(int id) => NotFound();
+        [HttpGet] public IActionResult Create() => NotFound();
+        [HttpGet] public IActionResult Edit(int id) => NotFound();
+        [HttpGet] public IActionResult Delete(int id) => NotFound();
 
-        // GET: Pagamentos/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var pagamento = await _context.Pagamentos
-                .Include(p => p.Obra)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (pagamento == null)
-            {
-                return NotFound();
-            }
-
-            return View(pagamento);
-        }
-
-        // GET: Pagamentos/Create
-        public IActionResult Create()
-        {
-            ViewData["ObraId"] = new SelectList(_context.Obras, "Id", "Descricao");
-            return View();
-        }
-
-        // POST: Pagamentos/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Pagamentos/Create (usado dentro de Obras/Details)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-    [Bind("Id,ObraId,Nome,Valor,DataHora")] Pagamento pagamento,
-    string? returnUrl)
+            [Bind("ObraId,Nome,Valor,DataHora")] Pagamento pagamento,
+            string? returnUrl)
         {
             if (pagamento.DataHora == default)
                 pagamento.DataHora = DateTime.Now;
 
-            if (ModelState.IsValid)
-            {
-                _context.Add(pagamento);
-                await _context.SaveChangesAsync();
+            if (!ModelState.IsValid)
+                return RedirectToObra(pagamento.ObraId, returnUrl, "pag");
 
-                if (!string.IsNullOrWhiteSpace(returnUrl))
-                    return Redirect(returnUrl);
+            _context.Pagamentos.Add(pagamento);
+            await _context.SaveChangesAsync();
 
-                return RedirectToAction(nameof(Index));
-            }
-
-            ViewData["ObraId"] = new SelectList(_context.Obras, "Id", "Descricao", pagamento.ObraId);
-            return View(pagamento);
+            return RedirectToObra(pagamento.ObraId, returnUrl, "pag");
         }
 
-        // GET: Pagamentos/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var pagamento = await _context.Pagamentos.FindAsync(id);
-            if (pagamento == null)
-            {
-                return NotFound();
-            }
-            ViewData["ObraId"] = new SelectList(_context.Obras, "Id", "Descricao", pagamento.ObraId);
-            return View(pagamento);
-        }
-
-        // POST: Pagamentos/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Pagamentos/DeleteConfirmed (usado dentro de Obras/Details)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,ObraId,Nome,Valor,DataHora")] Pagamento pagamento)
-        {
-            if (id != pagamento.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(pagamento);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!PagamentoExists(pagamento.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["ObraId"] = new SelectList(_context.Obras, "Id", "Descricao", pagamento.ObraId);
-            return View(pagamento);
-        }
-
-        // GET: Pagamentos/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var pagamento = await _context.Pagamentos
-                .Include(p => p.Obra)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (pagamento == null)
-            {
-                return NotFound();
-            }
-
-            return View(pagamento);
-        }
-
-        // POST: Pagamentos/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, string? returnUrl)
         {
             var pagamento = await _context.Pagamentos.FindAsync(id);
             if (pagamento != null)
             {
+                var obraId = pagamento.ObraId;
                 _context.Pagamentos.Remove(pagamento);
+                await _context.SaveChangesAsync();
+
+                return RedirectToObra(obraId, returnUrl, "pag");
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return NotFound();
         }
 
-        private bool PagamentoExists(int id)
+        // Helper comum: redireciona sempre para a obra/tab correta
+        private IActionResult RedirectToObra(int obraId, string? returnUrl, string tab)
         {
-            return _context.Pagamentos.Any(e => e.Id == id);
+            // ⚠️ Garante que o returnUrl é mesmo local (evita loop se for nulo ou inválido)
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return LocalRedirect(returnUrl);
+
+            // ✅ fallback automático: volta sempre para os detalhes da obra e aba certa
+            var url = Url.Action("Details", "Obras", new { id = obraId, tab });
+            return Redirect(url ?? "/Obras/Index");
         }
     }
 }
