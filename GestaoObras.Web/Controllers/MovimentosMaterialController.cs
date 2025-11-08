@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -7,46 +6,52 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using GestaoObras.Data.Context;
 using GestaoObras.Domain.Entities;
+using GestaoObras.Domain.Enums; // garante o enum OperacaoStock
 
 namespace GestaoObras.Web.Controllers
 {
     public class MovimentosMaterialController : Controller
     {
         private readonly ObrasDbContext _context;
+        public MovimentosMaterialController(ObrasDbContext context) => _context = context;
 
-        public MovimentosMaterialController(ObrasDbContext context)
+        // ---- Helpers ----
+        private static DateTime ToUtc(DateTime dt)
         {
-            _context = context;
+            if (dt == default) return DateTime.UtcNow;
+            if (dt.Kind == DateTimeKind.Unspecified) dt = DateTime.SpecifyKind(dt, DateTimeKind.Local);
+            return dt.ToUniversalTime();
         }
 
-        // GET: MovimentosMaterial
+        private static int Delta(MovimentoMaterial m) =>
+            m.Operacao == OperacaoStock.Entrada ? +m.Quantidade : -m.Quantidade;
+
+        // aplica delta ao material; valida não-negativo
+        private static bool TryApply(Material mat, int delta)
+        {
+            var novo = mat.StockDisponivel + delta;
+            if (novo < 0) return false;
+            mat.StockDisponivel = novo;
+            return true;
+        }
+
+        // ---- CRUD “listar” (mantidos) ----
         public async Task<IActionResult> Index()
         {
-            var obrasDbContext = _context.MovimentosMaterial.Include(m => m.Material).Include(m => m.Obra);
-            return View(await obrasDbContext.ToListAsync());
+            var q = _context.MovimentosMaterial.Include(m => m.Material).Include(m => m.Obra);
+            return View(await q.ToListAsync());
         }
 
-        // GET: MovimentosMaterial/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var movimentoMaterial = await _context.MovimentosMaterial
-                .Include(m => m.Material)
-                .Include(m => m.Obra)
+            if (id == null) return NotFound();
+            var mov = await _context.MovimentosMaterial
+                .Include(m => m.Material).Include(m => m.Obra)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (movimentoMaterial == null)
-            {
-                return NotFound();
-            }
-
-            return View(movimentoMaterial);
+            if (mov == null) return NotFound();
+            return View(mov);
         }
 
-        // GET: MovimentosMaterial/Create
         public IActionResult Create()
         {
             ViewData["MaterialId"] = new SelectList(_context.Materiais, "Id", "Nome");
@@ -54,127 +59,146 @@ namespace GestaoObras.Web.Controllers
             return View();
         }
 
-        // POST: MovimentosMaterial/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // ---- CREATE (aplica stock) ----
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-    [Bind("Id,ObraId,MaterialId,Quantidade,DataHora,Operacao")] MovimentoMaterial movimentoMaterial,
-    string? returnUrl)
+            [Bind("Id,ObraId,MaterialId,Quantidade,DataHora,Operacao")] MovimentoMaterial mov,
+            string? returnUrl)
         {
-            if (movimentoMaterial.DataHora == default)
-                movimentoMaterial.DataHora = DateTime.Now;
+            mov.DataHora = ToUtc(mov.DataHora);
 
-            if (ModelState.IsValid)
+            var material = await _context.Materiais.FindAsync(mov.MaterialId);
+            if (material == null)
+                ModelState.AddModelError(nameof(mov.MaterialId), "Material inválido.");
+
+            if (!ModelState.IsValid)
             {
-                _context.Add(movimentoMaterial);
-                await _context.SaveChangesAsync();
-
-                if (!string.IsNullOrWhiteSpace(returnUrl))
-                    return Redirect(returnUrl);
-
-                return RedirectToAction(nameof(Index));
+                ViewData["MaterialId"] = new SelectList(_context.Materiais, "Id", "Nome", mov.MaterialId);
+                ViewData["ObraId"] = new SelectList(_context.Obras, "Id", "Descricao", mov.ObraId);
+                return View(mov);
             }
 
-            ViewData["MaterialId"] = new SelectList(_context.Materiais, "Id", "Nome", movimentoMaterial.MaterialId);
-            ViewData["ObraId"] = new SelectList(_context.Obras, "Id", "Descricao", movimentoMaterial.ObraId);
-            return View(movimentoMaterial);
+            var delta = Delta(mov);
+
+            using var tx = await _context.Database.BeginTransactionAsync();
+            if (!TryApply(material!, delta))
+            {
+                ModelState.AddModelError(nameof(mov.Quantidade), "Stock insuficiente para esta saída.");
+                ViewData["MaterialId"] = new SelectList(_context.Materiais, "Id", "Nome", mov.MaterialId);
+                ViewData["ObraId"] = new SelectList(_context.Obras, "Id", "Descricao", mov.ObraId);
+                return View(mov);
+            }
+
+            _context.MovimentosMaterial.Add(mov);
+            await _context.SaveChangesAsync();
+            await tx.CommitAsync();
+
+            if (!string.IsNullOrWhiteSpace(returnUrl)) return Redirect(returnUrl);
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: MovimentosMaterial/Edit/5
+        // ---- EDIT (reverte antigo e aplica novo; suporta troca de material) ----
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
+            var mov = await _context.MovimentosMaterial.FindAsync(id);
+            if (mov == null) return NotFound();
 
-            var movimentoMaterial = await _context.MovimentosMaterial.FindAsync(id);
-            if (movimentoMaterial == null)
-            {
-                return NotFound();
-            }
-            ViewData["MaterialId"] = new SelectList(_context.Materiais, "Id", "Nome", movimentoMaterial.MaterialId);
-            ViewData["ObraId"] = new SelectList(_context.Obras, "Id", "Descricao", movimentoMaterial.ObraId);
-            return View(movimentoMaterial);
+            ViewData["MaterialId"] = new SelectList(_context.Materiais, "Id", "Nome", mov.MaterialId);
+            ViewData["ObraId"] = new SelectList(_context.Obras, "Id", "Descricao", mov.ObraId);
+            return View(mov);
         }
 
-        // POST: MovimentosMaterial/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,ObraId,MaterialId,Quantidade,DataHora,Operacao")] MovimentoMaterial movimentoMaterial)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,ObraId,MaterialId,Quantidade,DataHora,Operacao")] MovimentoMaterial updated)
         {
-            if (id != movimentoMaterial.Id)
+            if (id != updated.Id) return NotFound();
+            updated.DataHora = ToUtc(updated.DataHora);
+
+            var original = await _context.MovimentosMaterial.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id);
+            if (original == null) return NotFound();
+
+            var matOld = await _context.Materiais.FindAsync(original.MaterialId);
+            var matNew = original.MaterialId == updated.MaterialId
+                ? matOld
+                : await _context.Materiais.FindAsync(updated.MaterialId);
+
+            if (matOld == null || matNew == null)
             {
-                return NotFound();
+                ModelState.AddModelError("", "Material inválido.");
+                ViewData["MaterialId"] = new SelectList(_context.Materiais, "Id", "Nome", updated.MaterialId);
+                ViewData["ObraId"] = new SelectList(_context.Obras, "Id", "Descricao", updated.ObraId);
+                return View(updated);
             }
 
-            if (ModelState.IsValid)
+            using var tx = await _context.Database.BeginTransactionAsync();
+
+            // 1) reverter efeito antigo
+            var oldDelta = Delta(original);
+            if (!TryApply(matOld, -oldDelta))
             {
-                try
-                {
-                    _context.Update(movimentoMaterial);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!MovimentoMaterialExists(movimentoMaterial.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                // não deve falhar (estamos a “devolver” stock), mas por segurança:
+                await tx.RollbackAsync();
+                ModelState.AddModelError("", "Falha ao reverter stock antigo.");
+                return View(updated);
             }
-            ViewData["MaterialId"] = new SelectList(_context.Materiais, "Id", "Nome", movimentoMaterial.MaterialId);
-            ViewData["ObraId"] = new SelectList(_context.Obras, "Id", "Descricao", movimentoMaterial.ObraId);
-            return View(movimentoMaterial);
+
+            // 2) aplicar novo efeito (pode ser noutro material)
+            var newDelta = Delta(updated);
+            if (!TryApply(matNew, newDelta))
+            {
+                // volta a aplicar o antigo para não deixar stock incoerente
+                TryApply(matOld, oldDelta);
+                await tx.RollbackAsync();
+
+                ModelState.AddModelError(nameof(updated.Quantidade), "Stock insuficiente para esta saída.");
+                ViewData["MaterialId"] = new SelectList(_context.Materiais, "Id", "Nome", updated.MaterialId);
+                ViewData["ObraId"] = new SelectList(_context.Obras, "Id", "Descricao", updated.ObraId);
+                return View(updated);
+            }
+
+            _context.Update(updated);
+            await _context.SaveChangesAsync();
+            await tx.CommitAsync();
+
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: MovimentosMaterial/Delete/5
+        // ---- DELETE (reverte efeito no stock) ----
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var movimentoMaterial = await _context.MovimentosMaterial
-                .Include(m => m.Material)
-                .Include(m => m.Obra)
+            if (id == null) return NotFound();
+            var mov = await _context.MovimentosMaterial
+                .Include(m => m.Material).Include(m => m.Obra)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (movimentoMaterial == null)
-            {
-                return NotFound();
-            }
-
-            return View(movimentoMaterial);
+            if (mov == null) return NotFound();
+            return View(mov);
         }
 
-        // POST: MovimentosMaterial/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var movimentoMaterial = await _context.MovimentosMaterial.FindAsync(id);
-            if (movimentoMaterial != null)
+            var mov = await _context.MovimentosMaterial.FindAsync(id);
+            if (mov != null)
             {
-                _context.MovimentosMaterial.Remove(movimentoMaterial);
+                var mat = await _context.Materiais.FindAsync(mov.MaterialId);
+                if (mat != null)
+                {
+                    using var tx = await _context.Database.BeginTransactionAsync();
+                    // reverter o movimento
+                    TryApply(mat, -Delta(mov));
+                    _context.MovimentosMaterial.Remove(mov);
+                    await _context.SaveChangesAsync();
+                    await tx.CommitAsync();
+                }
             }
-
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool MovimentoMaterialExists(int id)
-        {
-            return _context.MovimentosMaterial.Any(e => e.Id == id);
-        }
+        private bool MovimentoMaterialExists(int id) =>
+            _context.MovimentosMaterial.Any(e => e.Id == id);
     }
 }
