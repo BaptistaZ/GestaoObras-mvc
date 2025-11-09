@@ -114,10 +114,8 @@
           <label class="form-label">Operação</label>
           <!-- Se OperacaoStock = {Entrada=1, Saida=2}, usa "Entrada"/"Saida" (names) ou 1/2 (ints).
                  Aqui uso os nomes para melhor legibilidade. -->
-          <select class="form-select" name="Operacao">
-            <option value="Entrada">Entrada</option>
-            <option value="Saida">Saida</option>
-          </select>
+          <select class="form-select" name="Operacao"
+            asp-items="Html.GetEnumSelectList<GestaoObras.Domain.Enums.OperacaoStock>()"></select>
         </div>
 
         <div class="col-md-2">
@@ -137,6 +135,11 @@
       aria-labelledby="mao-tab">
       <h5 class="mb-3">Mão-de-Obra</h5>
 
+      @if (TempData["FormError_mao"] is string errMao)
+      {
+        <div class="alert alert-danger">@errMao</div>
+      }
+
       @if (!(Model?.MaosDeObra?.Any() ?? false))
       {
         <div class="alert alert-info">Sem registos de mão-de-obra para esta obra.</div>
@@ -150,6 +153,7 @@
                 <th>Data</th>
                 <th>Nome</th>
                 <th class="text-end">Horas</th>
+                <th class="text-end">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -159,6 +163,17 @@
                   <td>@h.DataHora.ToString("yyyy-MM-dd HH:mm")</td>
                   <td>@h.Nome</td>
                   <td class="text-end">@h.HorasTrabalhadas</td>
+                  <td class="text-end">
+                    <form asp-controller="MaosDeObra" asp-action="Delete" method="post" class="d-inline">
+                      @Html.AntiForgeryToken()
+                      <input type="hidden" name="id" value="@h.Id" />
+                      <input type="hidden" name="returnUrl" value="@returnUrlMao" />
+                      <button type="submit" class="btn btn-sm btn-outline-danger"
+                        onclick="return confirm('Apagar este registo de mão-de-obra?');">
+                        Apagar
+                      </button>
+                    </form>
+                  </td>
                 </tr>
               }
             </tbody>
@@ -194,6 +209,11 @@
       aria-labelledby="pagamentos-tab">
       <h5 class="mb-3">Pagamentos</h5>
 
+      @if (TempData["FormError_pag"] is string errPag)
+      {
+        <div class="alert alert-danger">@errPag</div>
+      }
+
       @if (!(Model?.Pagamentos?.Any() ?? false))
       {
         <div class="alert alert-info">Ainda não existem pagamentos registados para esta obra.</div>
@@ -207,6 +227,7 @@
                 <th>Data</th>
                 <th>Nome</th>
                 <th class="text-end">Valor</th>
+                <th class="text-end">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -215,7 +236,18 @@
                 <tr>
                   <td>@p.DataHora.ToString("yyyy-MM-dd HH:mm")</td>
                   <td>@p.Nome</td>
-                  <td class="text-end">@p.Valor.ToString("C")</td>
+                  <td class="text-end">@p.Valor.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("pt-PT"))</td>
+                  <td class="text-end">
+                    <form asp-controller="Pagamentos" asp-action="Delete" method="post" class="d-inline">
+                      @Html.AntiForgeryToken()
+                      <input type="hidden" name="id" value="@p.Id" />
+                      <input type="hidden" name="returnUrl" value="@returnUrlPag" />
+                      <button type="submit" class="btn btn-sm btn-outline-danger"
+                        onclick="return confirm('Apagar este pagamento?');">
+                        Apagar
+                      </button>
+                    </form>
+                  </td>
                 </tr>
               }
             </tbody>
@@ -246,5 +278,4 @@
       </form>
     </div>
   </div>
-</div>
 </div>

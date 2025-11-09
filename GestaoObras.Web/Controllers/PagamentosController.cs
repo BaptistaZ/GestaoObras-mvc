@@ -13,12 +13,6 @@ namespace GestaoObras.Web.Controllers
         private readonly ObrasDbContext _context;
         public PagamentosController(ObrasDbContext context) => _context = context;
 
-        [HttpGet] public IActionResult Index() => NotFound();
-        [HttpGet] public IActionResult Details(int id) => NotFound();
-        [HttpGet] public IActionResult Create() => NotFound();
-        [HttpGet] public IActionResult Edit(int id) => NotFound();
-        [HttpGet] public IActionResult Delete(int id) => NotFound();
-
         private static DateTime ToUtc(DateTime dt)
         {
             if (dt == default) return DateTime.UtcNow;
@@ -32,14 +26,19 @@ namespace GestaoObras.Web.Controllers
         {
             pagamento.DataHora = ToUtc(pagamento.DataHora);
 
-            if (!ModelState.IsValid) return RedirectToObra(pagamento.ObraId, returnUrl, "pag");
+            if (!ModelState.IsValid)
+            {
+                TempData["FormError_pag"] = string.Join(" | ",
+                    ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                return RedirectToObra(pagamento.ObraId, returnUrl, "pag");
+            }
 
             _context.Pagamentos.Add(pagamento);
             await _context.SaveChangesAsync();
             return RedirectToObra(pagamento.ObraId, returnUrl, "pag");
         }
 
-        [HttpPost]
+        [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id, string? returnUrl)
         {

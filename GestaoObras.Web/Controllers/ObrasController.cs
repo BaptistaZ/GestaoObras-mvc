@@ -21,7 +21,10 @@ namespace GestaoObras.Web.Controllers
         // GET: Obras
         public async Task<IActionResult> Index()
         {
-            var query = _context.Obras.Include(o => o.Cliente);
+            var query = _context.Obras
+                .AsNoTracking()
+                .Include(o => o.Cliente)
+                .OrderBy(o => o.Nome);
             return View(await query.ToListAsync());
         }
 
@@ -29,6 +32,7 @@ namespace GestaoObras.Web.Controllers
         public async Task<IActionResult> Details(int id, string? tab = null)
         {
             var obra = await _context.Obras
+                .AsNoTracking()
                 .Include(o => o.Cliente)
                 .Include(o => o.MovimentosMaterial).ThenInclude(m => m.Material)
                 .Include(o => o.MaosDeObra)
@@ -41,7 +45,10 @@ namespace GestaoObras.Web.Controllers
 
             // Para o dropdown de materiais (form "Novo movimento")
             ViewBag.MaterialId = new SelectList(
-                await _context.Materiais.OrderBy(m => m.Nome).ToListAsync(),
+                await _context.Materiais
+                    .AsNoTracking()
+                    .OrderBy(m => m.Nome)
+                    .ToListAsync(),
                 "Id", "Nome"
             );
 
@@ -54,7 +61,10 @@ namespace GestaoObras.Web.Controllers
         // GET: Obras/Create
         public IActionResult Create()
         {
-            ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Email");
+            ViewData["ClienteId"] = new SelectList(
+                _context.Clientes.AsNoTracking().OrderBy(c => c.Nome),
+                "Id", "Nome"
+            );
             return View();
         }
 
@@ -65,7 +75,10 @@ namespace GestaoObras.Web.Controllers
         {
             if (!ModelState.IsValid)
             {
-                ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Email", obra.ClienteId);
+                ViewData["ClienteId"] = new SelectList(
+                    _context.Clientes.AsNoTracking().OrderBy(c => c.Nome),
+                    "Id", "Nome", obra.ClienteId
+                );
                 return View(obra);
             }
 
@@ -82,7 +95,10 @@ namespace GestaoObras.Web.Controllers
             var obra = await _context.Obras.FindAsync(id);
             if (obra == null) return NotFound();
 
-            ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Email", obra.ClienteId);
+            ViewData["ClienteId"] = new SelectList(
+                _context.Clientes.AsNoTracking().OrderBy(c => c.Nome),
+                "Id", "Nome", obra.ClienteId
+            );
             ViewBag.ReturnUrl = returnUrl;
             return View(obra);
         }
@@ -99,7 +115,10 @@ namespace GestaoObras.Web.Controllers
 
             if (!ModelState.IsValid)
             {
-                ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Email", obra.ClienteId);
+                ViewData["ClienteId"] = new SelectList(
+                    _context.Clientes.AsNoTracking().OrderBy(c => c.Nome),
+                    "Id", "Nome", obra.ClienteId
+                );
                 ViewBag.ReturnUrl = returnUrl;
                 return View(obra);
             }
@@ -129,6 +148,7 @@ namespace GestaoObras.Web.Controllers
             if (id == null) return NotFound();
 
             var obra = await _context.Obras
+                .AsNoTracking()
                 .Include(o => o.Cliente)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
