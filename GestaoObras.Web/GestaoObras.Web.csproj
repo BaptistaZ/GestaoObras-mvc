@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
     <ProjectReference Include="..\GestaoObras.Data\GestaoObras.Data.csproj" />
@@ -22,6 +22,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>4c7d8af7-2e7f-43d1-85ee-b990f1c02df8</UserSecretsId>
   </PropertyGroup>
 
 </Project>

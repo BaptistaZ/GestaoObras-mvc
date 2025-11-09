@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using GestaoObras.Data.Context;
 using GestaoObras.Domain.Entities;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GestaoObras.Web.Controllers
 {
@@ -20,25 +18,27 @@ namespace GestaoObras.Web.Controllers
         }
 
         // GET: Materiais
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 20)
         {
-            return View(await _context.Materiais.ToListAsync());
+            page = Math.Max(1, page);
+            pageSize = Math.Clamp(pageSize, 1, 100);
+
+            var q = _context.Materiais.AsNoTracking().OrderBy(m => m.Nome);
+            var total = await q.CountAsync();
+            var items = await q.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            ViewBag.Page = page; ViewBag.PageSize = pageSize; ViewBag.Total = total;
+            return View(items);
         }
 
         // GET: Materiais/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var material = await _context.Materiais
+                .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (material == null)
-            {
-                return NotFound();
-            }
+            if (material == null) return NotFound();
 
             return View(material);
         }
@@ -50,17 +50,27 @@ namespace GestaoObras.Web.Controllers
         }
 
         // POST: Materiais/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nome,Descricao,StockDisponivel")] Material material)
         {
+            // valida duplicado por Nome
+            if (await _context.Materiais.AnyAsync(m => m.Nome == material.Nome))
+                ModelState.AddModelError(nameof(material.Nome), "Já existe um material com este nome.");
+
             if (ModelState.IsValid)
             {
-                _context.Add(material);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    _context.Add(material);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Material criado com sucesso.";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (DbUpdateException)
+                {
+                    ModelState.AddModelError(string.Empty, "Não foi possível guardar. Verifique duplicados e tente novamente.");
+                }
             }
             return View(material);
         }
@@ -68,30 +78,24 @@ namespace GestaoObras.Web.Controllers
         // GET: Materiais/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var material = await _context.Materiais.FindAsync(id);
-            if (material == null)
-            {
-                return NotFound();
-            }
+            if (material == null) return NotFound();
+
             return View(material);
         }
 
         // POST: Materiais/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Descricao,StockDisponivel")] Material material)
         {
-            if (id != material.Id)
-            {
-                return NotFound();
-            }
+            if (id != material.Id) return NotFound();
+
+            // valida duplicado por Nome (exclui o próprio)
+            if (await _context.Materiais.AnyAsync(m => m.Id != id && m.Nome == material.Nome))
+                ModelState.AddModelError(nameof(material.Nome), "Já existe um material com este nome.");
 
             if (ModelState.IsValid)
             {
@@ -99,19 +103,17 @@ namespace GestaoObras.Web.Controllers
                 {
                     _context.Update(material);
                     await _context.SaveChangesAsync();
+                    TempData["Success"] = "Material atualizado.";
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!MaterialExists(material.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!MaterialExists(material.Id)) return NotFound(); else throw;
                 }
-                return RedirectToAction(nameof(Index));
+                catch (DbUpdateException)
+                {
+                    ModelState.AddModelError(string.Empty, "Não foi possível guardar. Verifique duplicados e tente novamente.");
+                }
             }
             return View(material);
         }
@@ -119,17 +121,12 @@ namespace GestaoObras.Web.Controllers
         // GET: Materiais/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var material = await _context.Materiais
+                .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (material == null)
-            {
-                return NotFound();
-            }
+            if (material == null) return NotFound();
 
             return View(material);
         }
@@ -139,14 +136,21 @@ namespace GestaoObras.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var material = await _context.Materiais.FindAsync(id);
-            if (material != null)
+            try
             {
-                _context.Materiais.Remove(material);
-            }
+                var material = await _context.Materiais.FindAsync(id);
+                if (material != null) _context.Materiais.Remove(material);
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Material removido.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException)
+            {
+                // FK Restrict: não permite apagar materiais com movimentos
+                TempData["Error"] = "Não é possível apagar este material: existem movimentos registados.";
+                return RedirectToAction(nameof(Delete), new { id });
+            }
         }
 
         private bool MaterialExists(int id)

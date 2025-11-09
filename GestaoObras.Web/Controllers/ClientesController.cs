@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using GestaoObras.Data.Context;
 using GestaoObras.Domain.Entities;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GestaoObras.Web.Controllers
 {
@@ -26,6 +24,9 @@ namespace GestaoObras.Web.Controllers
             int page = 1,
             int pageSize = 10)
         {
+            page = Math.Max(1, page);
+            pageSize = Math.Clamp(pageSize, 1, 100);
+
             // base query
             var q = _context.Clientes.AsNoTracking();
 
@@ -66,17 +67,11 @@ namespace GestaoObras.Web.Controllers
         // GET: Clientes/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var cliente = await _context.Clientes
+            var cliente = await _context.Clientes.AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (cliente == null)
-            {
-                return NotFound();
-            }
+            if (cliente == null) return NotFound();
 
             return View(cliente);
         }
@@ -88,17 +83,27 @@ namespace GestaoObras.Web.Controllers
         }
 
         // POST: Clientes/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nome,NIF,Morada,Email,Telefone")] Cliente cliente)
         {
+            // valida duplicado por NIF
+            if (await _context.Clientes.AnyAsync(c => c.NIF == cliente.NIF))
+                ModelState.AddModelError(nameof(cliente.NIF), "Já existe um cliente com este NIF.");
+
             if (ModelState.IsValid)
             {
-                _context.Add(cliente);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    _context.Add(cliente);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Cliente criado com sucesso.";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (DbUpdateException)
+                {
+                    ModelState.AddModelError(string.Empty, "Não foi possível guardar. Verifique duplicados e tente novamente.");
+                }
             }
             return View(cliente);
         }
@@ -106,30 +111,24 @@ namespace GestaoObras.Web.Controllers
         // GET: Clientes/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var cliente = await _context.Clientes.FindAsync(id);
-            if (cliente == null)
-            {
-                return NotFound();
-            }
+            if (cliente == null) return NotFound();
+
             return View(cliente);
         }
 
         // POST: Clientes/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,NIF,Morada,Email,Telefone")] Cliente cliente)
         {
-            if (id != cliente.Id)
-            {
-                return NotFound();
-            }
+            if (id != cliente.Id) return NotFound();
+
+            // valida duplicado por NIF (exclui o próprio)
+            if (await _context.Clientes.AnyAsync(c => c.Id != id && c.NIF == cliente.NIF))
+                ModelState.AddModelError(nameof(cliente.NIF), "Já existe um cliente com este NIF.");
 
             if (ModelState.IsValid)
             {
@@ -137,19 +136,17 @@ namespace GestaoObras.Web.Controllers
                 {
                     _context.Update(cliente);
                     await _context.SaveChangesAsync();
+                    TempData["Success"] = "Cliente atualizado.";
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ClienteExists(cliente.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!ClienteExists(cliente.Id)) return NotFound(); else throw;
                 }
-                return RedirectToAction(nameof(Index));
+                catch (DbUpdateException)
+                {
+                    ModelState.AddModelError(string.Empty, "Não foi possível guardar. Verifique duplicados e tente novamente.");
+                }
             }
             return View(cliente);
         }
@@ -157,17 +154,11 @@ namespace GestaoObras.Web.Controllers
         // GET: Clientes/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var cliente = await _context.Clientes
+            var cliente = await _context.Clientes.AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (cliente == null)
-            {
-                return NotFound();
-            }
+            if (cliente == null) return NotFound();
 
             return View(cliente);
         }
@@ -181,9 +172,9 @@ namespace GestaoObras.Web.Controllers
             if (cliente != null)
             {
                 _context.Clientes.Remove(cliente);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Cliente removido.";
             }
-
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

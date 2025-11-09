@@ -1,12 +1,12 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using GestaoObras.Data.Context;
+using GestaoObras.Domain.Entities;
+using GestaoObras.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using GestaoObras.Data.Context;
-using GestaoObras.Domain.Entities;
-using GestaoObras.Domain.Enums; // garante o enum OperacaoStock
 
 namespace GestaoObras.Web.Controllers
 {
@@ -84,6 +84,13 @@ namespace GestaoObras.Web.Controllers
             using var tx = await _context.Database.BeginTransactionAsync();
             if (!TryApply(material!, delta))
             {
+                // Mantém o contexto da Obra (aba “mov”)
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    TempData["Error"] = "Stock insuficiente para esta saída.";
+                    return LocalRedirect(returnUrl);
+                }
+
                 ModelState.AddModelError(nameof(mov.Quantidade), "Stock insuficiente para esta saída.");
                 ViewData["MaterialId"] = new SelectList(_context.Materiais, "Id", "Nome", mov.MaterialId);
                 ViewData["ObraId"] = new SelectList(_context.Obras, "Id", "Descricao", mov.ObraId);
@@ -94,8 +101,11 @@ namespace GestaoObras.Web.Controllers
             await _context.SaveChangesAsync();
             await tx.CommitAsync();
 
-            if (!string.IsNullOrWhiteSpace(returnUrl)) return Redirect(returnUrl);
-            return RedirectToAction(nameof(Index));
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return LocalRedirect(returnUrl);
+
+            // fallback
+            return RedirectToAction("Details", "Obras", new { id = mov.ObraId, tab = "mov" });
         }
 
         // ---- EDIT (reverte antigo e aplica novo; suporta troca de material) ----
@@ -139,13 +149,12 @@ namespace GestaoObras.Web.Controllers
             var oldDelta = Delta(original);
             if (!TryApply(matOld, -oldDelta))
             {
-                // não deve falhar (estamos a “devolver” stock), mas por segurança:
                 await tx.RollbackAsync();
                 ModelState.AddModelError("", "Falha ao reverter stock antigo.");
                 return View(updated);
             }
 
-            // 2) aplicar novo efeito (pode ser noutro material)
+            // 2) aplicar novo efeito
             var newDelta = Delta(updated);
             if (!TryApply(matNew, newDelta))
             {

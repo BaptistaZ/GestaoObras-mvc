@@ -33,6 +33,7 @@
 
       <div class="app-content">
         <div class="container-fluid">
+          @await Html.PartialAsync("_Alerts")
           @RenderBody()
         </div>
       </div>
