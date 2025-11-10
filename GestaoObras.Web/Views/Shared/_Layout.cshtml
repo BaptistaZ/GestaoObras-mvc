@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
   <link rel="stylesheet" href="~/lib/fontawesome/css/all.min.css" asp-append-version="true" />
   <link rel="stylesheet" href="~/lib/admin-lte/dist/css/adminlte.min.css" asp-append-version="true" />
+  <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
 
   @RenderSection("Styles", required: false)
 </head>
@@ -17,30 +18,46 @@
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
   <div class="app-wrapper">
 
-    @await Html.PartialAsync("_Navbar")   @* v4: app-header *@
-    @await Html.PartialAsync("_Sidebar")  @* v4: app-sidebar *@
+    @await Html.PartialAsync("_Navbar")   @* app-header *@
+    @await Html.PartialAsync("_Sidebar")  @* app-sidebar *@
 
     <main class="app-main">
+
+      <!-- HEADER DA PÁGINA -->
       <div class="app-content-header">
         <div class="container-fluid">
-          <div class="row">
-            <div class="col">
-              <h1 class="app-page-title">@ViewData["Title"]</h1>
-            </div>
+          <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-outline-secondary btn-sm"
+                    type="button"
+                    data-lte-toggle="sidebar"
+                    aria-label="Alternar menu">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <h1 class="app-page-title mb-0">
+              @if (ViewData["Icon"] is string icon && !string.IsNullOrWhiteSpace(icon))
+              {
+                <i class="@icon me-2"></i>
+              }
+              @ViewData["Title"]
+            </h1>
           </div>
         </div>
       </div>
 
+      <!-- CONTEÚDO -->
       <div class="app-content">
         <div class="container-fluid">
           @await Html.PartialAsync("_Alerts")
           @RenderBody()
         </div>
       </div>
+
     </main>
 
     @await Html.PartialAsync("_Footer")
-  </div>
+
+  </div> <!-- /app-wrapper -->
 
   <!-- (Opcional) validação client-side do template MVC -->
   <script src="~/lib/jquery/dist/jquery.min.js" asp-append-version="true"></script>

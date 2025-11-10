@@ -112,8 +112,6 @@
 
         <div class="col-md-3">
           <label class="form-label">Operação</label>
-          <!-- Se OperacaoStock = {Entrada=1, Saida=2}, usa "Entrada"/"Saida" (names) ou 1/2 (ints).
-                 Aqui uso os nomes para melhor legibilidade. -->
           <select class="form-select" name="Operacao"
             asp-items="Html.GetEnumSelectList<GestaoObras.Domain.Enums.OperacaoStock>()"></select>
         </div>
@@ -164,15 +162,11 @@
                   <td>@h.Nome</td>
                   <td class="text-end">@h.HorasTrabalhadas</td>
                   <td class="text-end">
-                    <form asp-controller="MaosDeObra" asp-action="Delete" method="post" class="d-inline">
-                      @Html.AntiForgeryToken()
-                      <input type="hidden" name="id" value="@h.Id" />
-                      <input type="hidden" name="returnUrl" value="@returnUrlMao" />
-                      <button type="submit" class="btn btn-sm btn-outline-danger"
-                        onclick="return confirm('Apagar este registo de mão-de-obra?');">
-                        Apagar
-                      </button>
-                    </form>
+                    <button type="button" class="btn btn-sm btn-outline-danger js-open-delete"
+                      data-action="@Url.Action("Delete", "MaosDeObra")" data-id="@h.Id" data-return="@returnUrlMao"
+                      data-label="registo de mão-de-obra">
+                      Apagar
+                    </button>
                   </td>
                 </tr>
               }
@@ -238,15 +232,11 @@
                   <td>@p.Nome</td>
                   <td class="text-end">@p.Valor.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("pt-PT"))</td>
                   <td class="text-end">
-                    <form asp-controller="Pagamentos" asp-action="Delete" method="post" class="d-inline">
-                      @Html.AntiForgeryToken()
-                      <input type="hidden" name="id" value="@p.Id" />
-                      <input type="hidden" name="returnUrl" value="@returnUrlPag" />
-                      <button type="submit" class="btn btn-sm btn-outline-danger"
-                        onclick="return confirm('Apagar este pagamento?');">
-                        Apagar
-                      </button>
-                    </form>
+                    <button type="button" class="btn btn-sm btn-outline-danger js-open-delete"
+                      data-action="@Url.Action("Delete", "Pagamentos")" data-id="@p.Id" data-return="@returnUrlPag"
+                      data-label="pagamento">
+                      Apagar
+                    </button>
                   </td>
                 </tr>
               }
@@ -279,3 +269,54 @@
     </div>
   </div>
 </div>
+
+<!-- Modal genérico de confirmação de remoção (reutilizado) -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmDeleteLabel">Confirmar remoção</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        Tem a certeza que pretende apagar este <strong id="delete-entity-label">registo</strong>?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <form id="deleteForm" method="post">
+          @Html.AntiForgeryToken()
+          <input type="hidden" name="id" id="delete-id" />
+          <input type="hidden" name="returnUrl" id="delete-return" />
+          <button type="submit" class="btn btn-danger">Apagar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+  <script>
+    (function () {
+      const modalEl = document.getElementById('confirmDeleteModal');
+      if (!modalEl) return;
+
+      const modal = new bootstrap.Modal(modalEl);
+      const form = document.getElementById('deleteForm');
+      const idInp = document.getElementById('delete-id');
+      const retInp = document.getElementById('delete-return');
+      const label = document.getElementById('delete-entity-label');
+
+      document.addEventListener('click', function (ev) {
+        const btn = ev.target.closest('.js-open-delete');
+        if (!btn) return;
+
+        form.action = btn.getAttribute('data-action') || '';
+        idInp.value = btn.getAttribute('data-id') || '';
+        retInp.value = btn.getAttribute('data-return') || '';
+        label.textContent = btn.getAttribute('data-label') || 'registo';
+
+        modal.show();
+      }, false);
+    })();
+  </script>
+}

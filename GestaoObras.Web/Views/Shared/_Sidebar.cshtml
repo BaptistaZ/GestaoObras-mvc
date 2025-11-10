@@ -1,38 +1,69 @@
+@functions{
+  string Active(string c, string? a = null)
+  {
+    var rc = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var ra = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var okC = string.Equals(rc, c, StringComparison.OrdinalIgnoreCase);
+    var okA = a == null || string.Equals(ra, a, StringComparison.OrdinalIgnoreCase);
+    return (okC && okA) ? "active" : "";
+  }
+}
+
 <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
-  <div class="sidebar-header">
-    <a asp-controller="Home" asp-action="Index" class="brand-link">
-      <span class="brand-text fw-light">Gestão de Obras</span>
+  <!-- Brand compacto e alinhado -->
+  <div class="sidebar-header border-bottom">
+    <a asp-controller="Home" asp-action="Index"
+       class="brand-link text-decoration-none d-flex align-items-center gap-2">
+      <i class="fa-solid fa-hammer fa-lg"></i>
+      <span class="brand-text fw-semibold text-truncate">Gestão de Obras</span>
     </a>
   </div>
 
   <div class="sidebar-wrapper">
     <nav class="mt-2">
-      <ul class="nav nav-pills nav-sidebar flex-column" role="menu">
+      <ul class="nav nav-pills nav-sidebar flex-column"
+          data-lte-toggle="treeview" role="menu" data-accordion="false">
+
         <li class="nav-item">
-          <a asp-controller="Home" asp-action="Index" class="nav-link">
-            <i class="nav-icon fa-solid fa-gauge"></i> <p>Dashboard</p>
+          <a asp-controller="Home" asp-action="Index"
+             class="nav-link @Active("Home","Index")">
+            <i class="nav-icon fa-solid fa-gauge fa-fw"></i>
+            <p>Dashboard</p>
           </a>
         </li>
+
         <li class="nav-item">
-          <a asp-controller="Clientes" asp-action="Index" class="nav-link">
-            <i class="nav-icon fa-solid fa-users"></i> <p>Clientes</p>
+          <a asp-controller="Clientes" asp-action="Index"
+             class="nav-link @Active("Clientes","Index")">
+            <i class="nav-icon fa-solid fa-users fa-fw"></i>
+            <p>Clientes</p>
           </a>
         </li>
+
         <li class="nav-item">
-          <a asp-controller="Materiais" asp-action="Index" class="nav-link">
-            <i class="nav-icon fa-solid fa-boxes-stacked"></i> <p>Materiais</p>
+          <a asp-controller="Materiais" asp-action="Index"
+             class="nav-link @Active("Materiais","Index")">
+            <i class="nav-icon fa-solid fa-boxes-stacked fa-fw"></i>
+            <p>Materiais</p>
           </a>
         </li>
+
         <li class="nav-item">
-          <a asp-controller="Obras" asp-action="Index" class="nav-link">
-            <i class="nav-icon fa-solid fa-building"></i> <p>Obras</p>
+          <a asp-controller="Obras" asp-action="Index"
+             class="nav-link @Active("Obras","Index")">
+            <i class="nav-icon fa-solid fa-building fa-fw"></i>
+            <p>Obras</p>
           </a>
         </li>
+
         <li class="nav-item">
-          <a asp-controller="MovimentosMaterial" asp-action="Index" class="nav-link">
-            <i class="nav-icon fa-solid fa-right-left"></i> <p>Movimentos</p>
+          <a asp-controller="MovimentosMaterial" asp-action="Index"
+             class="nav-link @Active("MovimentosMaterial","Index")">
+            <i class="nav-icon fa-solid fa-right-left fa-fw"></i>
+            <p>Movimentos</p>
           </a>
         </li>
+
       </ul>
     </nav>
   </div>

@@ -1,0 +1,34 @@
+/* --- Sidebar: alinhamento de ícones e texto --- */
+.app-sidebar .nav-sidebar > .nav-item > .nav-link{
+  display: flex;
+  align-items: center;
+  gap: .75rem;                 /* espaço entre ícone e texto */
+  padding: .625rem .875rem;    /* altura consistente */
+}
+
+.app-sidebar .nav-sidebar .nav-icon{
+  width: 1.35rem;              /* largura fixa = colunas de texto alinhadas */
+  text-align: center;
+  font-size: 1.1rem;           /* ligeiro bump no tamanho do ícone */
+  line-height: 1;              /* remove saltos verticais */
+  margin: 0;
+}
+
+.app-sidebar .nav-sidebar p{
+  margin: 0;                   /* elimina margens do <p> do AdminLTE */
+}
+
+/* Estado ativo mais legível (mantém cores do tema) */
+.app-sidebar .nav-sidebar .nav-link.active{
+  color: #fff;
+}
+.app-sidebar .nav-sidebar .nav-link.active .nav-icon{
+  color: #fff;
+}
+
+/* Brand na cabeça do menu, alinhado */
+.app-sidebar .brand-link{
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}

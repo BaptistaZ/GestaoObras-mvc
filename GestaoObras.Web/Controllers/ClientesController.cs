@@ -19,10 +19,10 @@ namespace GestaoObras.Web.Controllers
 
         // GET: Clientes
         public async Task<IActionResult> Index(
-            string? search,
-            string sort = "nome_asc",
-            int page = 1,
-            int pageSize = 10)
+    string? search,
+    string sort = "nome_asc",
+    int page = 1,
+    int pageSize = 10)
         {
             page = Math.Max(1, page);
             pageSize = Math.Clamp(pageSize, 1, 100);
@@ -30,27 +30,36 @@ namespace GestaoObras.Web.Controllers
             // base query
             var q = _context.Clientes.AsNoTracking();
 
-            // filtro (pesquisa por nome, email, telemóvel)
+            // filtro (Nome, Email, Telefone, NIF)
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var s = search.Trim();
                 q = q.Where(c =>
                     EF.Functions.ILike(c.Nome, $"%{s}%") ||
                     EF.Functions.ILike(c.Email ?? "", $"%{s}%") ||
-                    EF.Functions.ILike(c.Telefone ?? "", $"%{s}%"));
+                    EF.Functions.ILike(c.Telefone ?? "", $"%{s}%") ||
+                    EF.Functions.ILike(c.NIF ?? "", $"%{s}%")
+                );
             }
 
-            // ordenação
+            // ordenação (determinística com ThenBy Id)
             q = sort switch
             {
-                "nome_desc" => q.OrderByDescending(c => c.Nome),
-                "email_asc" => q.OrderBy(c => c.Email),
-                "email_desc" => q.OrderByDescending(c => c.Email),
-                _ => q.OrderBy(c => c.Nome) // nome_asc (default)
+                "nome_desc" => q.OrderByDescending(c => c.Nome).ThenBy(c => c.Id),
+                "nif_asc" => q.OrderBy(c => c.NIF).ThenBy(c => c.Id),
+                "nif_desc" => q.OrderByDescending(c => c.NIF).ThenBy(c => c.Id),
+                "email_asc" => q.OrderBy(c => c.Email).ThenBy(c => c.Id),
+                "email_desc" => q.OrderByDescending(c => c.Email).ThenBy(c => c.Id),
+                _ => q.OrderBy(c => c.Nome).ThenBy(c => c.Id) // nome_asc (default)
             };
 
-            // paginação
             var total = await q.CountAsync();
+
+            // se o filtro reduzir a lista e a página atual ficar “vazia”,
+            // recua para a última página válida
+            var totalPages = Math.Max(1, (int)Math.Ceiling((double)total / pageSize));
+            if (page > totalPages) page = totalPages;
+
             var items = await q.Skip((page - 1) * pageSize)
                                .Take(pageSize)
                                .ToListAsync();
@@ -168,13 +177,33 @@ namespace GestaoObras.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            // 1) Verifica dependências
+            bool temObras = await _context.Obras
+                .AsNoTracking()
+                .AnyAsync(o => o.ClienteId == id);
+
+            if (temObras)
+            {
+                TempData["Error"] = "Não é possível apagar este cliente: existem obras associadas.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // 2) Tenta remover de forma segura
             var cliente = await _context.Clientes.FindAsync(id);
             if (cliente != null)
             {
-                _context.Clientes.Remove(cliente);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Cliente removido.";
+                try
+                {
+                    _context.Clientes.Remove(cliente);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Cliente removido.";
+                }
+                catch (DbUpdateException)
+                {
+                    TempData["Error"] = "Não foi possível apagar o cliente (restrições de integridade).";
+                }
             }
+
             return RedirectToAction(nameof(Index));
         }
 
