@@ -4,15 +4,19 @@ using Microsoft.Extensions.Configuration;
 
 namespace GestaoObras.Data.Context;
 
-public class DesignTimeFactory : IDesignTimeDbContextFactory<ObrasDbContext>
+public sealed class DesignTimeFactory : IDesignTimeDbContextFactory<ObrasDbContext>
 {
     public ObrasDbContext CreateDbContext(string[] args)
     {
+        // Lê appsettings do projeto Web (onde está a connection string)
         var basePath = Path.Combine(Directory.GetCurrentDirectory(), "..", "GestaoObras.Web");
+
+        var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+
         var config = new ConfigurationBuilder()
             .SetBasePath(basePath)
             .AddJsonFile("appsettings.json", optional: false)
-            .AddJsonFile("appsettings.Development.json", optional: true)
+            .AddJsonFile($"appsettings.{env}.json", optional: true)
             .AddEnvironmentVariables()
             .Build();
 
@@ -20,7 +24,11 @@ public class DesignTimeFactory : IDesignTimeDbContextFactory<ObrasDbContext>
                  ?? throw new InvalidOperationException("Connection string 'ObrasDb' não encontrada.");
 
         var options = new DbContextOptionsBuilder<ObrasDbContext>()
-            .UseNpgsql(cs)
+            .UseNpgsql(cs, o =>
+            {
+                // Garante que as migrações ficam neste assembly (Data)
+                o.MigrationsAssembly(typeof(ObrasDbContext).Assembly.FullName);
+            })
             .Options;
 
         return new ObrasDbContext(options);

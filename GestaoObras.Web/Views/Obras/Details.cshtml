@@ -1,8 +1,11 @@
 @model GestaoObras.Domain.Entities.Obra
 @{
   ViewData["Title"] = $"Obra: {Model?.Nome}";
+  var currentUrl = ViewContext.HttpContext?.Request?.Path + ViewContext.HttpContext?.Request?.QueryString;
+
   // returnUrl base (fallback para dados gerais)
   string baseReturnUrl = Url.Action("Details", "Obras", new { id = Model?.Id }) ?? "/";
+
   // returnUrl por aba (para voltar ao sítio certo depois de submit)
   string returnUrlMov = Url.Action("Details", "Obras", new { id = Model?.Id, tab = "mov" }) ?? baseReturnUrl;
   string returnUrlMao = Url.Action("Details", "Obras", new { id = Model?.Id, tab = "mao" }) ?? baseReturnUrl;
@@ -10,11 +13,21 @@
 
   string activeTab = (ViewBag.ActiveTab as string) ?? ""; // "mov" | "mao" | "pag" | ""
   string FormatCoord(double? v) => v.HasValue ? v.Value.ToString("0.00000") : "-";
+
+  // Helper local para badge de operação (Entrada/Saída)
+  string Badge(string op) => op == "Entrada" ? "badge bg-success"
+  : op == "Saida" ? "badge bg-danger"
+  : "badge bg-secondary";
 }
 
 <div class="card-header d-flex align-items-center gap-2">
   <h3 class="card-title mb-0">@Model?.Nome</h3>
-  <div class="ms-auto">
+
+  <div class="ms-auto d-flex gap-2">
+    <a class="btn btn-outline-primary btn-sm" asp-action="Edit" asp-route-id="@Model?.Id"
+      asp-route-returnUrl="@(currentUrl ?? baseReturnUrl)">
+      <i class="fa-solid fa-pen-to-square"></i> Editar
+    </a>
     <a class="btn btn-outline-secondary btn-sm" asp-action="Index">
       <i class="fa-solid fa-arrow-left"></i> Voltar
     </a>
@@ -42,7 +55,8 @@
   </ul>
 
   <div class="tab-content p-3 border border-top-0 rounded-bottom">
-    <!-- TAB: Dados Gerais -->
+
+    @* --- TAB: Dados Gerais --- *@
     <div class="tab-pane fade @(string.IsNullOrEmpty(activeTab) ? "show active" : "")" id="dados" role="tabpanel"
       aria-labelledby="dados-tab">
       <dl class="row mb-0">
@@ -63,7 +77,7 @@
       </dl>
     </div>
 
-    <!-- TAB: Registo de Material -->
+    @* --- TAB: Registo de Material --- *@
     <div class="tab-pane fade @(activeTab == "mov" ? "show active" : "")" id="movimentos" role="tabpanel"
       aria-labelledby="movimentos-tab">
       <h5 class="mb-3">Movimentos de Material</h5>
@@ -88,9 +102,9 @@
               @foreach (var m in Model!.MovimentosMaterial!.OrderByDescending(x => x.DataHora))
               {
                 <tr>
-                  <td>@m.DataHora.ToString("yyyy-MM-dd HH:mm")</td>
+                  <td>@m.DataHora.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
                   <td>@m.Material?.Nome</td>
-                  <td>@m.Operacao</td>
+                  <td><span class="@Badge(m.Operacao.ToString())">@m.Operacao</span></td>
                   <td class="text-end">@m.Quantidade</td>
                 </tr>
               }
@@ -128,7 +142,7 @@
       </form>
     </div>
 
-    <!-- TAB: Registo de Mão-de-Obra -->
+    @* --- TAB: Mão-de-Obra --- *@
     <div class="tab-pane fade @(activeTab == "mao" ? "show active" : "")" id="mao" role="tabpanel"
       aria-labelledby="mao-tab">
       <h5 class="mb-3">Mão-de-Obra</h5>
@@ -158,7 +172,7 @@
               @foreach (var h in Model!.MaosDeObra!.OrderByDescending(x => x.DataHora))
               {
                 <tr>
-                  <td>@h.DataHora.ToString("yyyy-MM-dd HH:mm")</td>
+                  <td>@h.DataHora.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
                   <td>@h.Nome</td>
                   <td class="text-end">@h.HorasTrabalhadas</td>
                   <td class="text-end">
@@ -198,7 +212,7 @@
       </form>
     </div>
 
-    <!-- TAB: Registo de Pagamentos -->
+    @* --- TAB: Pagamentos --- *@
     <div class="tab-pane fade @(activeTab == "pag" ? "show active" : "")" id="pagamentos" role="tabpanel"
       aria-labelledby="pagamentos-tab">
       <h5 class="mb-3">Pagamentos</h5>
@@ -228,9 +242,11 @@
               @foreach (var p in Model!.Pagamentos!.OrderByDescending(x => x.DataHora))
               {
                 <tr>
-                  <td>@p.DataHora.ToString("yyyy-MM-dd HH:mm")</td>
+                  <td>@p.DataHora.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
                   <td>@p.Nome</td>
-                  <td class="text-end">@p.Valor.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("pt-PT"))</td>
+                  <td class="text-end">
+                    @p.Valor.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("pt-PT"))
+                  </td>
                   <td class="text-end">
                     <button type="button" class="btn btn-sm btn-outline-danger js-open-delete"
                       data-action="@Url.Action("Delete", "Pagamentos")" data-id="@p.Id" data-return="@returnUrlPag"
@@ -267,10 +283,11 @@
         </div>
       </form>
     </div>
+
   </div>
 </div>
 
-<!-- Modal genérico de confirmação de remoção (reutilizado) -->
+@* Modal genérico de confirmação de remoção *@
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -299,7 +316,6 @@
     (function () {
       const modalEl = document.getElementById('confirmDeleteModal');
       if (!modalEl) return;
-
       const modal = new bootstrap.Modal(modalEl);
       const form = document.getElementById('deleteForm');
       const idInp = document.getElementById('delete-id');
@@ -314,7 +330,6 @@
         idInp.value = btn.getAttribute('data-id') || '';
         retInp.value = btn.getAttribute('data-return') || '';
         label.textContent = btn.getAttribute('data-label') || 'registo';
-
         modal.show();
       }, false);
     })();

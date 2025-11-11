@@ -1,7 +1,10 @@
-<nav class="app-header navbar navbar-expand bg-body">
+<nav class="app-header navbar navbar-expand bg-body" role="navigation" aria-label="Barra superior">
   <div class="container-fluid">
-    <!-- (Sem toggle aqui) -->
-    <span class="navbar-text fw-semibold ms-1">Gestão de Obras</span>
+    <a asp-controller="Home" asp-action="Index"
+       class="navbar-brand d-flex align-items-center gap-2 text-decoration-none">
+      <i class="fa-solid fa-hammer"></i>
+      <span class="fw-semibold">Gestão de Obras</span>
+    </a>
     <div class="ms-auto"></div>
   </div>
 </nav>

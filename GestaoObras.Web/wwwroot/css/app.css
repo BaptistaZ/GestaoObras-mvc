@@ -1,34 +1,185 @@
-/* --- Sidebar: alinhamento de ícones e texto --- */
-.app-sidebar .nav-sidebar > .nav-item > .nav-link{
-  display: flex;
-  align-items: center;
-  gap: .75rem;                 /* espaço entre ícone e texto */
-  padding: .625rem .875rem;    /* altura consistente */
+/* ---------------------- Preferências globais ---------------------- */
+:root {
+  color-scheme: light dark;  
 }
 
-.app-sidebar .nav-sidebar .nav-icon{
-  width: 1.35rem;              /* largura fixa = colunas de texto alinhadas */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Estados de foco bem visíveis, sem estragar o layout */
+:focus-visible {
+  outline: 2px solid #0d6efd;         /* cor bootstrap primary */
+  outline-offset: 2px;
+}
+
+/* Link “Saltar para o conteúdo” (skip-link) – apenas visível ao focar */
+.visually-hidden-focusable:focus {
+  position: static !important;
+  clip: auto !important;
+  width: auto;
+  height: auto;
+  padding: .25rem .5rem;
+  z-index: 1080;
+}
+
+/* ---------------------- SIDEBAR (AdminLTE) ---------------------- */
+
+/* Alinhamento de ícones e texto */
+.app-sidebar .nav-sidebar > .nav-item > .nav-link {
+  display: flex;
+  align-items: center;
+  gap: .75rem;               
+  padding: .625rem .875rem;  
+}
+
+.app-sidebar .nav-sidebar .nav-icon {
+  width: 1.35rem;            
   text-align: center;
-  font-size: 1.1rem;           /* ligeiro bump no tamanho do ícone */
-  line-height: 1;              /* remove saltos verticais */
+  font-size: 1.1rem;         
+  line-height: 1;            
   margin: 0;
 }
 
-.app-sidebar .nav-sidebar p{
-  margin: 0;                   /* elimina margens do <p> do AdminLTE */
+.app-sidebar .nav-sidebar p {
+  margin: 0;                 
 }
 
-/* Estado ativo mais legível (mantém cores do tema) */
-.app-sidebar .nav-sidebar .nav-link.active{
+/* Estado ativo mais legível */
+.app-sidebar .nav-sidebar .nav-link.active {
   color: #fff;
 }
-.app-sidebar .nav-sidebar .nav-link.active .nav-icon{
+.app-sidebar .nav-sidebar .nav-link.active .nav-icon {
   color: #fff;
 }
 
 /* Brand na cabeça do menu, alinhado */
-.app-sidebar .brand-link{
+.app-sidebar .brand-link {
   display: flex;
   align-items: center;
   gap: .5rem;
+}
+
+/* Hover/focus subtil em items da sidebar (dark theme friendly) */
+.app-sidebar .nav-link:hover,
+.app-sidebar .nav-link:focus-visible {
+  background: rgba(255,255,255,.08);
+}
+
+/* ---------------------- HEADER / TITULARES ---------------------- */
+
+/* Espaçamento suave entre título e botão hamburguer */
+.app-page-title {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  line-height: 1.2;
+}
+
+/* ---------------------- SMALL-BOX (AdminLTE) ---------------------- */
+
+/* Evita “salto” do link no hover e reforça clicabilidade */
+.small-box .small-box-footer {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  text-decoration: none;
+}
+.small-box .small-box-footer:hover,
+.small-box .small-box-footer:focus {
+  text-decoration: underline;
+}
+
+/* ---------------------- TABELAS & LISTAS ---------------------- */
+
+/* Ações sempre à direita, numa linha, sem quebra */
+.table .text-end.text-nowrap {
+  white-space: nowrap;
+}
+
+/* Truncagem suave para colunas que podem crescer */
+.table td.truncate,
+.table th.truncate {
+  max-width: 380px;             
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Cabeçalhos clicáveis de ordenação – cursor e sublinhado ao passar */
+th a {
+  text-decoration: none;
+  cursor: pointer;
+}
+th a:hover,
+th a:focus-visible {
+  text-decoration: underline;
+}
+
+/* ---------------------- FORMS / VALIDAÇÃO ---------------------- */
+
+input.form-control[readonly],
+input.form-control[disabled] {
+  background-color: var(--bs-tertiary-bg);
+}
+
+/* Realça campos com erro da validação unobtrusive */
+.input-validation-error,
+select.input-validation-error,
+textarea.input-validation-error {
+  border-color: #dc3545;  
+}
+
+/* Ajuda a alinhamento de labels + inputs em grids */
+.form-label {
+  margin-bottom: .25rem;
+}
+
+/* Inputs de quantidade e dinheiro com largura pequena (utilitário) */
+.w-qty { width: 8ch; }
+.w-money { width: 12ch; }
+
+/* ---------------------- ALERTS ---------------------- */
+
+/* Margem consistente quando renderizadas no topo do content */
+.alert {
+  margin-top: .25rem;
+}
+
+/* Lista dentro de alert sem margens agressivas */
+.alert ul { margin-bottom: 0; }
+
+/* ---------------------- MODAIS ---------------------- */
+
+/* Botões do modal: evitar colar ao bordo */
+.modal-footer .btn + .btn {
+  margin-left: .5rem;
+}
+
+/* ---------------------- UTILITÁRIOS ---------------------- */
+
+/* Monoespaçado “limpo” para códigos, ids, NIF, etc. */
+.text-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Badge de operação coerente com os detalhes */
+.badge-op-entrada { background-color: #198754 !important; } 
+.badge-op-saida   { background-color: #dc3545 !important; } 
+
+/* ---------------------- RESPONSIVE ---------------------- */
+
+/* Em ecrãs muito pequenos, garantimos legibilidade de células */
+@media (max-width: 420px) {
+  .table td, .table th {
+    font-size: .9rem;
+  }
+  .app-page-title {
+    font-size: 1.1rem;
+  }
 }

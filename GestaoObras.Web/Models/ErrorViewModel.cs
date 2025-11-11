@@ -1,8 +1,10 @@
-namespace GestaoObras.Web.Models;
-
-public class ErrorViewModel
+namespace GestaoObras.Web.Models
 {
-    public string? RequestId { get; set; }
+    /// Modelo padrão usado pela página Error.
+    public sealed class ErrorViewModel
+    {
+        public string? RequestId { get; set; }
 
-    public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+        public bool ShowRequestId => !string.IsNullOrWhiteSpace(RequestId);
+    }
 }

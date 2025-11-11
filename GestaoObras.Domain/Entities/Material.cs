@@ -6,18 +6,17 @@ public class Material
 {
     public int Id { get; set; }
 
-    [Display(Name = "Nome")]
-    [Required(ErrorMessage = "O {0} é obrigatório.")]
-    [StringLength(120, ErrorMessage = "O {0} não pode exceder {1} caracteres.")]
+    [Required]
+    [StringLength(120)]
     public string Nome { get; set; } = string.Empty;
 
-    [Display(Name = "Descrição")]
-    [StringLength(500, ErrorMessage = "A {0} não pode exceder {1} caracteres.")]
+    [StringLength(500)]
     public string? Descricao { get; set; }
 
     [Display(Name = "Stock Disponível")]
-    [Range(0, int.MaxValue, ErrorMessage = "O {0} deve ser um número igual ou superior a {1}.")]
+    [Range(0, int.MaxValue)]
     public int StockDisponivel { get; set; }
 
+    // Navegação
     public ICollection<MovimentoMaterial> Movimentos { get; set; } = new List<MovimentoMaterial>();
 }

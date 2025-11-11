@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GestaoObras.Data.Migrations
 {
     [DbContext(typeof(ObrasDbContext))]
-    [Migration("20251029151311_Init")]
+    [Migration("20251111121713_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -35,27 +35,42 @@ namespace GestaoObras.Data.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
 
                     b.Property<string>("Morada")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("NIF")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(9)
+                        .HasColumnType("character varying(9)");
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
 
                     b.Property<string>("Telefone")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Clientes");
+                    b.HasIndex("Email");
+
+                    b.HasIndex("NIF")
+                        .IsUnique();
+
+                    b.HasIndex("Nome");
+
+                    b.ToTable("Clientes", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Clientes_NIF_9_DIGITOS", "\"NIF\" ~ '^[0-9]{9}$'");
+                        });
                 });
 
             modelBuilder.Entity("GestaoObras.Domain.Entities.MaoDeObra", b =>
@@ -67,23 +82,30 @@ namespace GestaoObras.Data.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DataHora")
-                        .HasColumnType("timestamp with time zone");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now() at time zone 'utc'");
 
                     b.Property<decimal>("HorasTrabalhadas")
-                        .HasColumnType("numeric");
+                        .HasPrecision(9, 2)
+                        .HasColumnType("numeric(9,2)");
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
 
                     b.Property<int>("ObraId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ObraId");
+                    b.HasIndex("ObraId", "DataHora");
 
-                    b.ToTable("MaosDeObra");
+                    b.ToTable("MaosDeObra", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_MaosDeObra_Horas_Pos", "HorasTrabalhadas >= 0");
+                        });
                 });
 
             modelBuilder.Entity("GestaoObras.Domain.Entities.Material", b =>
@@ -95,19 +117,26 @@ namespace GestaoObras.Data.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Descricao")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
 
                     b.Property<int>("StockDisponivel")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Materiais");
+                    b.HasIndex("Nome")
+                        .IsUnique();
+
+                    b.ToTable("Materiais", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Materiais_Stock_NaoNegativo", "StockDisponivel >= 0");
+                        });
                 });
 
             modelBuilder.Entity("GestaoObras.Domain.Entities.MovimentoMaterial", b =>
@@ -119,7 +148,9 @@ namespace GestaoObras.Data.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DataHora")
-                        .HasColumnType("timestamp with time zone");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now() at time zone 'utc'");
 
                     b.Property<int>("MaterialId")
                         .HasColumnType("integer");
@@ -135,11 +166,16 @@ namespace GestaoObras.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MaterialId");
+                    b.HasIndex("DataHora");
 
-                    b.HasIndex("ObraId");
+                    b.HasIndex("MaterialId", "DataHora");
 
-                    b.ToTable("MovimentosMaterial");
+                    b.HasIndex("ObraId", "DataHora");
+
+                    b.ToTable("MovimentosMaterial", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_MovMat_Qtd_Pos", "\"Quantidade\" > 0");
+                        });
                 });
 
             modelBuilder.Entity("GestaoObras.Domain.Entities.Obra", b =>
@@ -151,14 +187,17 @@ namespace GestaoObras.Data.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Ativa")
-                        .HasColumnType("boolean");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
 
                     b.Property<int>("ClienteId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Descricao")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<double>("Latitude")
                         .HasColumnType("double precision");
@@ -168,17 +207,27 @@ namespace GestaoObras.Data.Migrations
 
                     b.Property<string>("Morada")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClienteId");
+                    b.HasIndex("Ativa");
 
-                    b.ToTable("Obras");
+                    b.HasIndex("ClienteId", "Nome")
+                        .IsUnique();
+
+                    b.ToTable("Obras", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Obras_Lat_Range", "\"Latitude\" BETWEEN -90 AND 90");
+
+                            t.HasCheckConstraint("CK_Obras_Lon_Range", "\"Longitude\" BETWEEN -180 AND 180");
+                        });
                 });
 
             modelBuilder.Entity("GestaoObras.Domain.Entities.Pagamento", b =>
@@ -190,23 +239,32 @@ namespace GestaoObras.Data.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DataHora")
-                        .HasColumnType("timestamp with time zone");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now() at time zone 'utc'");
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
 
                     b.Property<int>("ObraId")
                         .HasColumnType("integer");
 
                     b.Property<decimal>("Valor")
-                        .HasColumnType("numeric");
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ObraId");
+                    b.HasIndex("DataHora");
 
-                    b.ToTable("Pagamentos");
+                    b.HasIndex("ObraId", "DataHora");
+
+                    b.ToTable("Pagamentos", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Pagamentos_Valor_Pos", "\"Valor\" >= 0");
+                        });
                 });
 
             modelBuilder.Entity("GestaoObras.Domain.Entities.MaoDeObra", b =>
@@ -223,9 +281,9 @@ namespace GestaoObras.Data.Migrations
             modelBuilder.Entity("GestaoObras.Domain.Entities.MovimentoMaterial", b =>
                 {
                     b.HasOne("GestaoObras.Domain.Entities.Material", "Material")
-                        .WithMany("MovimentosMaterial")
+                        .WithMany("Movimentos")
                         .HasForeignKey("MaterialId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("GestaoObras.Domain.Entities.Obra", "Obra")
@@ -244,7 +302,7 @@ namespace GestaoObras.Data.Migrations
                     b.HasOne("GestaoObras.Domain.Entities.Cliente", "Cliente")
                         .WithMany("Obras")
                         .HasForeignKey("ClienteId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Cliente");
@@ -268,7 +326,7 @@ namespace GestaoObras.Data.Migrations
 
             modelBuilder.Entity("GestaoObras.Domain.Entities.Material", b =>
                 {
-                    b.Navigation("MovimentosMaterial");
+                    b.Navigation("Movimentos");
                 });
 
             modelBuilder.Entity("GestaoObras.Domain.Entities.Obra", b =>

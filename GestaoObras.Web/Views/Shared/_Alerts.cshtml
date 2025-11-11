@@ -1,18 +1,44 @@
+@* Views/Shared/_Alerts.cshtml *@
 @{
-    var hasError = TempData["Error"] is string;
-    var hasSuccess = TempData["Success"] is string;
+    IEnumerable<string> ToList(object? val)
+        => val switch
+        {
+            string s when !string.IsNullOrWhiteSpace(s) => new[] { s },
+            IEnumerable<string> list => list,
+            _ => Array.Empty<string>()
+        };
+
+    var errors   = ToList(TempData["Error"]);
+    var successes= ToList(TempData["Success"]);
 }
-@if (hasError)
+
+@if (errors.Any())
 {
-    <div class="alert alert-danger alert-dismissible fade show mt-2" role="alert">
-        @TempData["Error"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-    </div>
+  <div class="alert alert-danger alert-dismissible fade show mt-2"
+       role="alert" aria-live="assertive" aria-atomic="true">
+    <ul class="mb-0 ps-3">
+    @foreach (var e in errors) { <li>@e</li> }
+    </ul>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+  </div>
 }
-@if (hasSuccess)
+
+@if (successes.Any())
 {
-    <div class="alert alert-success alert-dismissible fade show mt-2" role="alert">
-        @TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-    </div>
+  <div class="alert alert-success alert-dismissible fade show mt-2"
+       role="alert" aria-live="polite" aria-atomic="true">
+    <ul class="mb-0 ps-3">
+    @foreach (var s in successes) { <li>@s</li> }
+    </ul>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+  </div>
+}
+
+@section Scripts {
+  <script>
+    // Auto-ocultar após 6s (se o utilizador não interagir)
+    document.querySelectorAll('.alert.show').forEach(function (el) {
+      setTimeout(function(){ try { bootstrap.Alert.getOrCreateInstance(el).close(); } catch(e){} }, 6000);
+    });
+  </script>
 }

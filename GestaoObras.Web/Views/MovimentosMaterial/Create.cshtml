@@ -3,6 +3,7 @@
 
 @{
     ViewData["Title"] = "Novo Movimento";
+    var agoraLocal = DateTime.Now.ToString("yyyy-MM-ddTHH:mm");
 }
 
 <div class="card card-outline card-primary">
@@ -11,21 +12,25 @@
   </div>
 
   <div class="card-body">
+    <!-- Resumo de validação server-side -->
     <form asp-action="Create" class="row g-3">
       <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
+      <!-- Obra -->
       <div class="col-md-6">
         <label asp-for="ObraId" class="form-label"></label>
         <select asp-for="ObraId" class="form-select" asp-items="ViewBag.ObraId"></select>
         <span asp-validation-for="ObraId" class="text-danger"></span>
       </div>
 
+      <!-- Material -->
       <div class="col-md-6">
         <label asp-for="MaterialId" class="form-label"></label>
         <select asp-for="MaterialId" class="form-select" asp-items="ViewBag.MaterialId"></select>
         <span asp-validation-for="MaterialId" class="text-danger"></span>
       </div>
 
+      <!-- Operação -->
       <div class="col-md-4">
         <label asp-for="Operacao" class="form-label"></label>
         <select asp-for="Operacao" class="form-select"
@@ -33,15 +38,17 @@
         <span asp-validation-for="Operacao" class="text-danger"></span>
       </div>
 
+      <!-- Quantidade -->
       <div class="col-md-4">
         <label asp-for="Quantidade" class="form-label"></label>
         <input asp-for="Quantidade" class="form-control" min="1" />
         <span asp-validation-for="Quantidade" class="text-danger"></span>
       </div>
 
+      <!-- Data/Hora (local); controller converte para UTC -->
       <div class="col-md-4">
         <label asp-for="DataHora" class="form-label"></label>
-        <input asp-for="DataHora" class="form-control" type="datetime-local" />
+        <input asp-for="DataHora" class="form-control" type="datetime-local" value="@agoraLocal" />
         <span asp-validation-for="DataHora" class="text-danger"></span>
       </div>
 

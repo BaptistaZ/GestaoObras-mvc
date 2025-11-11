@@ -1,13 +1,18 @@
 using GestaoObras.Data.Context;
 using GestaoObras.Web.Infrastructure.Binding;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var culture = new CultureInfo("pt-PT");
+CultureInfo.DefaultThreadCurrentCulture = culture;
+CultureInfo.DefaultThreadCurrentUICulture = culture;
 
 // MVC + binder tolerante a ponto/vírgula para doubles
 builder.Services.AddControllersWithViews(o =>
 {
-    o.ModelBinderProviders.Insert(0, new FlexibleDoubleModelBinderProvider());
+    o.ModelBinderProviders.Insert(0, new FlexibleNumberModelBinderProvider());
 });
 
 // Connection string tem de vir de env vars/user-secrets

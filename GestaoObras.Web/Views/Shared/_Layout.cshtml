@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
   <title>@ViewData["Title"] - Gestão de Obras</title>
 
   <!-- CSS -->
@@ -16,12 +17,15 @@
 </head>
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+  <a class="visually-hidden-focusable position-absolute top-0 start-0 m-2 btn btn-sm btn-outline-primary"
+     href="#conteudo-principal">Saltar para o conteúdo</a>
+
   <div class="app-wrapper">
 
-    @await Html.PartialAsync("_Navbar")   @* app-header *@
-    @await Html.PartialAsync("_Sidebar")  @* app-sidebar *@
+    @await Html.PartialAsync("_Navbar")
+    @await Html.PartialAsync("_Sidebar")
 
-    <main class="app-main">
+    <main class="app-main" id="conteudo-principal">
 
       <!-- HEADER DA PÁGINA -->
       <div class="app-content-header">
@@ -30,14 +34,14 @@
             <button class="btn btn-outline-secondary btn-sm"
                     type="button"
                     data-lte-toggle="sidebar"
-                    aria-label="Alternar menu">
+                    aria-label="Alternar navegação lateral">
               <i class="fa-solid fa-bars"></i>
             </button>
 
             <h1 class="app-page-title mb-0">
               @if (ViewData["Icon"] is string icon && !string.IsNullOrWhiteSpace(icon))
               {
-                <i class="@icon me-2"></i>
+                <i class="@icon me-2" aria-hidden="true"></i>
               }
               @ViewData["Title"]
             </h1>
@@ -57,15 +61,14 @@
 
     @await Html.PartialAsync("_Footer")
 
-  </div> <!-- /app-wrapper -->
+  </div>
 
-  <!-- (Opcional) validação client-side do template MVC -->
+  <!-- JS: carregar no fim para melhor TTI -->
   <script src="~/lib/jquery/dist/jquery.min.js" asp-append-version="true"></script>
   <script src="~/lib/jquery-validation/dist/jquery.validate.min.js" asp-append-version="true"></script>
   <script src="~/lib/jquery-validation/dist/localization/messages_pt_PT.js" asp-append-version="true"></script>
   <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js" asp-append-version="true"></script>
 
-  <!-- JS core -->
   <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
   <script src="~/lib/admin-lte/dist/js/adminlte.min.js" asp-append-version="true"></script>
 

@@ -4,9 +4,9 @@
 @{
     ViewData["Title"] = "Apagar Movimento";
     string BadgeForOperacao(OperacaoStock op) =>
-        op == OperacaoStock.Entrada ? "bg-primary"
-      : op == OperacaoStock.Saida   ? "bg-warning text-dark"
-      : "bg-secondary";
+        op == OperacaoStock.Entrada ? "badge bg-success"
+      : op == OperacaoStock.Saida   ? "badge bg-danger"
+      : "badge bg-secondary";
 }
 
 <div class="card card-outline card-danger">
@@ -27,15 +27,13 @@
       <dd class="col-sm-9">@Model?.Material?.Nome</dd>
 
       <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Operacao)</dt>
-      <dd class="col-sm-9">
-        <span class="badge @BadgeForOperacao(Model.Operacao)">@Model.Operacao</span>
-      </dd>
+      <dd class="col-sm-9"><span class="@BadgeForOperacao(Model.Operacao)">@Model.Operacao</span></dd>
 
       <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Quantidade)</dt>
       <dd class="col-sm-9">@Model.Quantidade</dd>
 
       <dt class="col-sm-3">@Html.DisplayNameFor(m => m.DataHora)</dt>
-      <dd class="col-sm-9">@Model.DataHora.ToString("dd/MM/yyyy HH:mm")</dd>
+      <dd class="col-sm-9">@Model.DataHora.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
     </dl>
   </div>
 
@@ -46,6 +44,7 @@
         <i class="fa-solid fa-trash"></i> Apagar
       </button>
     </form>
+
     <a asp-action="Index" class="btn btn-outline-secondary">
       <i class="fa-solid fa-arrow-left"></i> Cancelar
     </a>

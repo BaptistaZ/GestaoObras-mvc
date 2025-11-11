@@ -1,13 +1,17 @@
 ﻿@model GestaoObras.Web.Models.DashboardVM
 @{
-  ViewData["Title"] = "Dashboard";
-  ViewData["Icon"] = "fa-solid fa-gauge-high";
+    ViewData["Title"] = "Dashboard";
+    ViewData["Icon"]  = "fa-solid fa-gauge-high";
+
+    // Helpers locais (apenas para esta view)
+    string BadgeClass(string op) => op == "Entrada" ? "bg-success" : "bg-danger";
+    string BadgeText(string op)  => op == "Entrada" ? "Entrada" : "Saída";
 }
 
 <section class="content pt-4 pb-4">
   <div class="container-fluid">
 
-    <!-- KPIs (AdminLTE small-box) -->
+    <!-- KPIs -->
     <div class="row g-3">
       <div class="col-12 col-sm-6 col-lg-3">
         <div class="small-box bg-info shadow-sm">
@@ -15,9 +19,9 @@
             <h3>@Model.ObrasAtivas</h3>
             <p>Obras ativas</p>
           </div>
-          <div class="icon"><i class="fa-solid fa-hard-hat"></i></div>
-          <a asp-controller="Obras" asp-action="Index" class="small-box-footer">
-            Ver mais <i class="fa-solid fa-arrow-circle-right"></i>
+          <div class="icon"><i class="fa-solid fa-hard-hat" aria-hidden="true"></i></div>
+          <a asp-controller="Obras" asp-action="Index" class="small-box-footer" aria-label="Ver obras">
+            Ver mais <i class="fa-solid fa-arrow-circle-right" aria-hidden="true"></i>
           </a>
         </div>
       </div>
@@ -28,9 +32,9 @@
             <h3>@Model.ClientesTotal</h3>
             <p>Clientes</p>
           </div>
-          <div class="icon"><i class="fa-solid fa-users"></i></div>
-          <a asp-controller="Clientes" asp-action="Index" class="small-box-footer">
-            Ver mais <i class="fa-solid fa-arrow-circle-right"></i>
+          <div class="icon"><i class="fa-solid fa-users" aria-hidden="true"></i></div>
+          <a asp-controller="Clientes" asp-action="Index" class="small-box-footer" aria-label="Ver clientes">
+            Ver mais <i class="fa-solid fa-arrow-circle-right" aria-hidden="true"></i>
           </a>
         </div>
       </div>
@@ -41,9 +45,9 @@
             <h3>@Model.MateriaisTotal</h3>
             <p>Materiais</p>
           </div>
-          <div class="icon"><i class="fa-solid fa-boxes-stacked"></i></div>
-          <a asp-controller="Materiais" asp-action="Index" class="small-box-footer">
-            Ver mais <i class="fa-solid fa-arrow-circle-right"></i>
+          <div class="icon"><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i></div>
+          <a asp-controller="Materiais" asp-action="Index" class="small-box-footer" aria-label="Ver materiais">
+            Ver mais <i class="fa-solid fa-arrow-circle-right" aria-hidden="true"></i>
           </a>
         </div>
       </div>
@@ -54,9 +58,9 @@
             <h3>@Model.MovimentosHoje</h3>
             <p>Movimentos hoje</p>
           </div>
-          <div class="icon"><i class="fa-solid fa-right-left"></i></div>
-          <a asp-controller="MovimentosMaterial" asp-action="Index" class="small-box-footer">
-            Ver mais <i class="fa-solid fa-arrow-circle-right"></i>
+          <div class="icon"><i class="fa-solid fa-right-left" aria-hidden="true"></i></div>
+          <a asp-controller="MovimentosMaterial" asp-action="Index" class="small-box-footer" aria-label="Ver movimentos">
+            Ver mais <i class="fa-solid fa-arrow-circle-right" aria-hidden="true"></i>
           </a>
         </div>
       </div>
@@ -66,7 +70,7 @@
     <div class="card">
       <div class="card-header">
         <h3 class="card-title mb-0">
-          <i class="fa-solid fa-rotate-right me-2"></i>Últimos movimentos
+          <i class="fa-solid fa-rotate-right me-2" aria-hidden="true"></i>Últimos movimentos
         </h3>
       </div>
 
@@ -75,51 +79,45 @@
           <table class="table table-sm table-striped table-hover mb-0">
             <thead class="table-light">
               <tr>
-                <th>Data</th>
-                <th>Obra</th>
-                <th>Material</th>
-                <th>Operação</th>
-                <th class="text-end">Qtd</th>
+                <th scope="col">Data</th>
+                <th scope="col">Obra</th>
+                <th scope="col">Material</th>
+                <th scope="col">Operação</th>
+                <th scope="col" class="text-end">Qtd</th>
               </tr>
             </thead>
             <tbody>
-              @if (!Model.UltimosMovimentos.Any())
+            @if (!Model.UltimosMovimentos.Any())
+            {
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">
+                  Sem movimentos recentes.
+                </td>
+              </tr>
+            }
+            else
+            {
+              foreach (var m in Model.UltimosMovimentos)
               {
                 <tr>
-                  <td colspan="5" class="text-center text-muted py-4">
-                    Sem movimentos recentes.
+                  <td>@m.Data.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                  <td>@m.Obra</td>
+                  <td>@m.Material</td>
+                  <td>
+                    <span class="badge @BadgeClass(m.Operacao)">@BadgeText(m.Operacao)</span>
                   </td>
+                  <td class="text-end">@m.Quantidade</td>
                 </tr>
               }
-              else
-              {
-                @foreach (var m in Model.UltimosMovimentos)
-                {
-                  <tr>
-                    <td>@m.Data.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
-                    <td>@m.Obra</td>
-                    <td>@m.Material</td>
-                    <td>
-                      @if (m.Operacao == "Entrada")
-                      {
-                        <span class="badge bg-success">Entrada</span>
-                      }
-                      else
-                      {
-                        <span class="badge bg-danger">Saída</span>
-                      }
-                    </td>
-                    <td class="text-end">@m.Quantidade</td>
-                  </tr>
-                }
-              }
+            }
             </tbody>
           </table>
         </div>
       </div>
 
       <div class="card-footer text-end">
-        <a class="btn btn-sm btn-outline-secondary" asp-controller="MovimentosMaterial" asp-action="Index">
+        <a class="btn btn-sm btn-outline-secondary"
+           asp-controller="MovimentosMaterial" asp-action="Index" aria-label="Ver todos os movimentos">
           Ver todos
         </a>
       </div>

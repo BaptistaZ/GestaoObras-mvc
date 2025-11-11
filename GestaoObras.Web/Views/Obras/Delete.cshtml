@@ -34,7 +34,9 @@
       <dd class="col-sm-9">@(Model?.Ativa == true ? "Sim" : "Não")</dd>
 
       <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Cliente)</dt>
-      <dd class="col-sm-9">@Model?.Cliente?.Email</dd>
+      <dd class="col-sm-9">
+        @(Model?.Cliente is null ? "-" : $"{Model.Cliente.Nome} ({Model.Cliente.Email})")
+      </dd>
     </dl>
   </div>
 

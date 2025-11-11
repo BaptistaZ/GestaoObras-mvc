@@ -1,32 +1,27 @@
 @model IEnumerable<GestaoObras.Domain.Entities.Cliente>
 
 @{
-    ViewData["Title"] = "Clientes";
+  ViewData["Title"] = "Clientes";
 
-    // Estado vindo do Controller (ViewBag)
-    var search   = ViewBag.Search as string;
-    var sort     = (ViewBag.Sort as string) ?? "nome_asc";
-    int page     = ViewBag.Page     ?? 1;
-    int pageSize = ViewBag.PageSize ?? 10;
-    int total    = ViewBag.Total    ?? 0;
+  var search = ViewBag.Search as string;
+  var sort = (ViewBag.Sort as string) ?? "nome_asc";
+  int page = ViewBag.Page ?? 1;
+  int pageSize = ViewBag.PageSize ?? 10;
+  int total = ViewBag.Total ?? 0;
 
-    // Segurança contra zeros/valores absurdos
-    pageSize    = Math.Max(1, pageSize);
-    page        = Math.Max(1, page);
-    int totalPages = Math.Max(1, (int)Math.Ceiling((double)total / pageSize));
+  pageSize = Math.Max(1, pageSize);
+  page = Math.Max(1, page);
+  int totalPages = Math.Max(1, (int)Math.Ceiling((double)total / pageSize));
 
-    // Próximas direções de ordenação nas colunas
-    string nextSortNome = sort == "nome_asc" ? "nome_desc" : "nome_asc";
-    string nextSortNif  = sort == "nif_asc"  ? "nif_desc"  : "nif_asc";
+  string nextSortNome = sort == "nome_asc" ? "nome_desc" : "nome_asc";
+  string nextSortNif = sort == "nif_asc" ? "nif_desc" : "nif_asc";
 
-    // Para DisplayNameFor com segurança
-    var firstItem = Model.FirstOrDefault();
 }
 
 <div class="card card-outline card-primary">
   <div class="card-header d-flex align-items-center gap-2">
     <h3 class="card-title mb-0">Lista de Clientes</h3>
-    <div class="ms-auto">
+    <div class="ms-auto d-flex gap-2">
       <a asp-action="Create" class="btn btn-success btn-sm">
         <i class="fa-solid fa-plus"></i> Novo Cliente
       </a>
@@ -34,21 +29,22 @@
   </div>
 
   <div class="card-body">
-    <!-- filtros -->
-    <form method="get" class="row g-2 mb-3">
+    <!-- Filtros -->
+    <form id="filtersForm" method="get" class="row gy-2 gx-2 align-items-end mb-3">
+      <input type="hidden" name="page" value="1" />
       <div class="col-12 col-md-6">
         <label class="form-label" for="search">Pesquisar</label>
-        <input class="form-control" id="search" name="search"
-               value="@search" placeholder="Nome, Email, Telefone ou NIF..." />
+        <input class="form-control" id="search" name="search" value="@search"
+          placeholder="Nome, Email, Telefone ou NIF..." />
       </div>
 
       <div class="col-6 col-md-3">
         <label class="form-label" for="sort">Ordenar por</label>
         <select class="form-select" id="sort" name="sort">
-          <option value="nome_asc"  selected="@(sort == "nome_asc")">Nome (A→Z)</option>
+          <option value="nome_asc" selected="@(sort == "nome_asc")">Nome (A→Z)</option>
           <option value="nome_desc" selected="@(sort == "nome_desc")">Nome (Z→A)</option>
-          <option value="nif_asc"   selected="@(sort == "nif_asc")">NIF (↑)</option>
-          <option value="nif_desc"  selected="@(sort == "nif_desc")">NIF (↓)</option>
+          <option value="nif_asc" selected="@(sort == "nif_asc")">NIF (↑)</option>
+          <option value="nif_desc" selected="@(sort == "nif_desc")">NIF (↓)</option>
         </select>
       </div>
 
@@ -64,6 +60,10 @@
       <div class="col-12 col-md-1 d-grid">
         <button class="btn btn-primary" type="submit">Aplicar</button>
       </div>
+
+      <div class="col-12 col-md-auto">
+        <a asp-action="Index" class="btn btn-link">Limpar</a>
+      </div>
     </form>
 
     @if (!Model.Any())
@@ -77,43 +77,47 @@
           <thead class="table-light">
             <tr>
               <th>
-                <a asp-action="Index" asp-route-search="@search"
-                   asp-route-sort="@nextSortNome" asp-route-page="1"
-                   asp-route-pageSize="@pageSize">
-                  @Html.DisplayNameFor(m => firstItem.Nome)
-                  @(sort.StartsWith("nome_") ? (sort.EndsWith("_asc") ? " ↑" : " ↓") : "")
+                <a asp-action="Index" asp-route-search="@search" asp-route-sort="@nextSortNome" asp-route-page="1"
+                  asp-route-pageSize="@pageSize" class="text-decoration-none">
+                  @Html.DisplayNameFor(c => c.Nome)
+                  @if (sort.StartsWith("nome_"))
+                  {
+                    <i class="fa-solid @(sort.EndsWith("_asc") ? "fa-sort-up" : "fa-sort-down") ms-1"></i>
+                  }
                 </a>
               </th>
               <th>
-                <a asp-action="Index" asp-route-search="@search"
-                   asp-route-sort="@nextSortNif" asp-route-page="1"
-                   asp-route-pageSize="@pageSize">
-                  @Html.DisplayNameFor(m => firstItem.NIF)
-                  @(sort.StartsWith("nif_") ? (sort.EndsWith("_asc") ? " ↑" : " ↓") : "")
+                <a asp-action="Index" asp-route-search="@search" asp-route-sort="@nextSortNif" asp-route-page="1"
+                  asp-route-pageSize="@pageSize" class="text-decoration-none">
+                  @Html.DisplayNameFor(c => c.NIF)
+                  @if (sort.StartsWith("nif_"))
+                  {
+                    <i class="fa-solid @(sort.EndsWith("_asc") ? "fa-sort-up" : "fa-sort-down") ms-1"></i>
+                  }
                 </a>
               </th>
-              <th>@Html.DisplayNameFor(m => firstItem.Morada)</th>
-              <th>@Html.DisplayNameFor(m => firstItem.Email)</th>
-              <th>@Html.DisplayNameFor(m => firstItem.Telefone)</th>
+              <th>@Html.DisplayNameFor(c => c.Morada)</th>
+              <th>@Html.DisplayNameFor(c => c.Email)</th>
+              <th>@Html.DisplayNameFor(c => c.Telefone)</th>
               <th class="text-end" style="width:180px;">Ações</th>
             </tr>
           </thead>
           <tbody>
-          @foreach (var item in Model)
-          {
-            <tr>
-              <td>@item.Nome</td>
-              <td>@item.NIF</td>
-              <td>@item.Morada</td>
-              <td>@item.Email</td>
-              <td>@item.Telefone</td>
-              <td class="text-end text-nowrap">
-                <a class="btn btn-sm btn-outline-primary"   asp-action="Edit"    asp-route-id="@item.Id">Editar</a>
-                <a class="btn btn-sm btn-outline-secondary" asp-action="Details" asp-route-id="@item.Id">Detalhes</a>
-                <a class="btn btn-sm btn-outline-danger"    asp-action="Delete"  asp-route-id="@item.Id">Apagar</a>
-              </td>
-            </tr>
-          }
+            @foreach (var item in Model)
+            {
+              <tr>
+                <td>@item.Nome</td>
+                <td>@item.NIF</td>
+                <td>@item.Morada</td>
+                <td>@item.Email</td>
+                <td>@item.Telefone</td>
+                <td class="text-end text-nowrap">
+                  <a class="btn btn-sm btn-outline-primary" asp-action="Edit" asp-route-id="@item.Id">Editar</a>
+                  <a class="btn btn-sm btn-outline-secondary" asp-action="Details" asp-route-id="@item.Id">Detalhes</a>
+                  <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@item.Id">Apagar</a>
+                </td>
+              </tr>
+            }
           </tbody>
         </table>
       </div>
@@ -122,24 +126,21 @@
       <nav aria-label="Paginação">
         <ul class="pagination mb-0">
           <li class="page-item @((page <= 1) ? "disabled" : "")">
-            <a class="page-link"
-               asp-action="Index" asp-route-search="@search" asp-route-sort="@sort"
-               asp-route-page="@(page - 1)" asp-route-pageSize="@pageSize">Anterior</a>
+            <a class="page-link" asp-action="Index" asp-route-search="@search" asp-route-sort="@sort"
+              asp-route-page="@(page - 1)" asp-route-pageSize="@pageSize">Anterior</a>
           </li>
 
           @for (int i = 1; i <= totalPages; i++)
           {
             <li class="page-item @(i == page ? "active" : "")">
-              <a class="page-link"
-                 asp-action="Index" asp-route-search="@search" asp-route-sort="@sort"
-                 asp-route-page="@i" asp-route-pageSize="@pageSize">@i</a>
+              <a class="page-link" asp-action="Index" asp-route-search="@search" asp-route-sort="@sort" asp-route-page="@i"
+                asp-route-pageSize="@pageSize">@i</a>
             </li>
           }
 
           <li class="page-item @((page >= totalPages) ? "disabled" : "")">
-            <a class="page-link"
-               asp-action="Index" asp-route-search="@search" asp-route-sort="@sort"
-               asp-route-page="@(page + 1)" asp-route-pageSize="@pageSize">Seguinte</a>
+            <a class="page-link" asp-action="Index" asp-route-search="@search" asp-route-sort="@sort"
+              asp-route-page="@(page + 1)" asp-route-pageSize="@pageSize">Seguinte</a>
           </li>
         </ul>
       </nav>
@@ -150,3 +151,44 @@
     }
   </div>
 </div>
+
+@section Scripts {
+<script>
+(function () {
+  const form = document.getElementById('filtersForm');
+  if (!form) return;
+
+  const search   = document.getElementById('search');
+  const sort     = document.getElementById('sort');
+  const pageSize = document.getElementById('pageSize');
+  const pageHid  = form.querySelector('input[name="page"]');
+
+  // sempre que mudamos filtros, voltamos à página 1
+  const resetPage = () => { if (pageHid) pageHid.value = 1; };
+
+  // auto-reset quando limpas a pesquisa
+  let t;
+  if (search) {
+    search.addEventListener('input', () => {
+      clearTimeout(t);
+      t = setTimeout(() => {
+        if (search.value.trim() === '') { resetPage(); form.submit(); }
+      }, 250); // debounce
+    });
+
+    // ESC limpa e aplica
+    search.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        search.value = '';
+        resetPage();
+        form.submit();
+      }
+    });
+  }
+
+  // auto-submit ao mudar ordenação/tamanho de página
+  if (sort)     sort.addEventListener('change', () => { resetPage(); form.submit(); });
+  if (pageSize) pageSize.addEventListener('change', () => { resetPage(); form.submit(); });
+})();
+</script>
+}
