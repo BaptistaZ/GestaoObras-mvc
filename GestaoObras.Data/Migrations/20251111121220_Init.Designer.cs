@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GestaoObras.Data.Migrations
 {
     [DbContext(typeof(ObrasDbContext))]
-    [Migration("20251111121713_Init")]
+    [Migration("20251111121220_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -69,7 +69,7 @@ namespace GestaoObras.Data.Migrations
 
                     b.ToTable("Clientes", null, t =>
                         {
-                            t.HasCheckConstraint("CK_Clientes_NIF_9_DIGITOS", "\"NIF\" ~ '^[0-9]{9}$'");
+                            t.HasCheckConstraint("CK_Clientes_NIF_9_DIGITOS", "NIF ~ '^[0-9]{9}$'");
                         });
                 });
 

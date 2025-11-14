@@ -48,7 +48,7 @@ Desenvolvido em C# ASP.NET Core MVC, com Entity Framework Core e PostgreSQL.
 🛠️ Tecnologias Utilizadas
 	•	ASP.NET Core MVC 8
 	•	Entity Framework Core
-	•	PostgreSQL + Npgsql
+	•	PostgreSQL 
 	•	Bootstrap 5 + AdminLTE
 	•	Font Awesome
 

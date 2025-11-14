@@ -27,7 +27,7 @@ namespace GestaoObras.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Clientes", x => x.Id);
-                    table.CheckConstraint("CK_Clientes_NIF_9_DIGITOS", "\"NIF\" ~ '^[0-9]{9}$'");
+                    table.CheckConstraint("CK_Clientes_NIF_9_DIGITOS", "NIF ~ '^[0-9]{9}$'");
                 });
 
             migrationBuilder.CreateTable(
@@ -43,7 +43,7 @@ namespace GestaoObras.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Materiais", x => x.Id);
-                    table.CheckConstraint("CK_Materiais_Stock_NaoNegativo", "\"StockDisponivel\" >= 0");
+                    table.CheckConstraint("CK_Materiais_Stock_NaoNegativo", "StockDisponivel >= 0");
                 });
 
             migrationBuilder.CreateTable(
@@ -87,7 +87,7 @@ namespace GestaoObras.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MaosDeObra", x => x.Id);
-                    table.CheckConstraint("CK_MaosDeObra_Horas_Pos", "\"HorasTrabalhadas\" >= 0");
+                    table.CheckConstraint("CK_MaosDeObra_Horas_Pos", "HorasTrabalhadas >= 0");
                     table.ForeignKey(
                         name: "FK_MaosDeObra_Obras_ObraId",
                         column: x => x.ObraId,

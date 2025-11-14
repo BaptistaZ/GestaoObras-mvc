@@ -1,11 +1,11 @@
 ﻿@model GestaoObras.Web.Models.DashboardVM
 @{
-    ViewData["Title"] = "Dashboard";
-    ViewData["Icon"]  = "fa-solid fa-gauge-high";
+  ViewData["Title"] = "Dashboard";
+  ViewData["Icon"] = "fa-solid fa-gauge-high";
 
-    // Helpers locais (apenas para esta view)
-    string BadgeClass(string op) => op == "Entrada" ? "bg-success" : "bg-danger";
-    string BadgeText(string op)  => op == "Entrada" ? "Entrada" : "Saída";
+  // Helpers locais (apenas para esta view)
+  string BadgeClass(string op) => op == "Entrada" ? "badge-op-entrada" : "badge-op-saida";
+  string BadgeText(string op) => op == "Entrada" ? "Entrada" : "Saída";
 }
 
 <section class="content pt-4 pb-4">
@@ -13,114 +13,202 @@
 
     <!-- KPIs -->
     <div class="row g-3">
+
+      <!-- Obras ativas -->
       <div class="col-12 col-sm-6 col-lg-3">
-        <div class="small-box bg-info shadow-sm">
-          <div class="inner">
-            <h3>@Model.ObrasAtivas</h3>
-            <p>Obras ativas</p>
+        <div class="card kpi-card shadow-sm h-100">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <small class="text-uppercase text-muted fw-semibold">Obras ativas</small>
+              <h2 class="fw-bold mb-0 text-mono">@Model.ObrasAtivas</h2>
+            </div>
+            <div class="kpi-icon kpi-icon-blue">
+              <i class="fa-solid fa-hard-hat" aria-hidden="true"></i>
+            </div>
           </div>
-          <div class="icon"><i class="fa-solid fa-hard-hat" aria-hidden="true"></i></div>
-          <a asp-controller="Obras" asp-action="Index" class="small-box-footer" aria-label="Ver obras">
-            Ver mais <i class="fa-solid fa-arrow-circle-right" aria-hidden="true"></i>
-          </a>
+          <div class="card-footer border-0 bg-transparent pt-0">
+            <a asp-controller="Obras" asp-action="Index" class="kpi-link" aria-label="Ver obras">
+              Ver mais <i class="fa-solid fa-arrow-right-long ms-1" aria-hidden="true"></i>
+            </a>
+          </div>
         </div>
       </div>
 
+      <!-- Clientes -->
       <div class="col-12 col-sm-6 col-lg-3">
-        <div class="small-box bg-success shadow-sm">
-          <div class="inner">
-            <h3>@Model.ClientesTotal</h3>
-            <p>Clientes</p>
+        <div class="card kpi-card shadow-sm h-100">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <small class="text-uppercase text-muted fw-semibold">Clientes</small>
+              <h2 class="fw-bold mb-0 text-mono">@Model.ClientesTotal</h2>
+            </div>
+            <div class="kpi-icon kpi-icon-green">
+              <i class="fa-solid fa-users" aria-hidden="true"></i>
+            </div>
           </div>
-          <div class="icon"><i class="fa-solid fa-users" aria-hidden="true"></i></div>
-          <a asp-controller="Clientes" asp-action="Index" class="small-box-footer" aria-label="Ver clientes">
-            Ver mais <i class="fa-solid fa-arrow-circle-right" aria-hidden="true"></i>
-          </a>
+          <div class="card-footer border-0 bg-transparent pt-0">
+            <a asp-controller="Clientes" asp-action="Index" class="kpi-link" aria-label="Ver clientes">
+              Ver mais <i class="fa-solid fa-arrow-right-long ms-1" aria-hidden="true"></i>
+            </a>
+          </div>
         </div>
       </div>
 
+      <!-- Materiais -->
       <div class="col-12 col-sm-6 col-lg-3">
-        <div class="small-box bg-warning shadow-sm">
-          <div class="inner">
-            <h3>@Model.MateriaisTotal</h3>
-            <p>Materiais</p>
+        <div class="card kpi-card shadow-sm h-100">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <small class="text-uppercase text-muted fw-semibold">Materiais</small>
+              <h2 class="fw-bold mb-0 text-mono">@Model.MateriaisTotal</h2>
+            </div>
+            <div class="kpi-icon kpi-icon-amber">
+              <i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i>
+            </div>
           </div>
-          <div class="icon"><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i></div>
-          <a asp-controller="Materiais" asp-action="Index" class="small-box-footer" aria-label="Ver materiais">
-            Ver mais <i class="fa-solid fa-arrow-circle-right" aria-hidden="true"></i>
-          </a>
+          <div class="card-footer border-0 bg-transparent pt-0">
+            <a asp-controller="Materiais" asp-action="Index" class="kpi-link" aria-label="Ver materiais">
+              Ver mais <i class="fa-solid fa-arrow-right-long ms-1" aria-hidden="true"></i>
+            </a>
+          </div>
         </div>
       </div>
 
+      <!-- Movimentos hoje -->
       <div class="col-12 col-sm-6 col-lg-3">
-        <div class="small-box bg-danger shadow-sm">
-          <div class="inner">
-            <h3>@Model.MovimentosHoje</h3>
-            <p>Movimentos hoje</p>
+        <div class="card kpi-card shadow-sm h-100">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <small class="text-uppercase text-muted fw-semibold">Movimentos hoje</small>
+              <h2 class="fw-bold mb-0 text-mono">@Model.MovimentosHoje</h2>
+            </div>
+            <div class="kpi-icon kpi-icon-red">
+              <i class="fa-solid fa-right-left" aria-hidden="true"></i>
+            </div>
           </div>
-          <div class="icon"><i class="fa-solid fa-right-left" aria-hidden="true"></i></div>
-          <a asp-controller="MovimentosMaterial" asp-action="Index" class="small-box-footer" aria-label="Ver movimentos">
-            Ver mais <i class="fa-solid fa-arrow-circle-right" aria-hidden="true"></i>
-          </a>
+          <div class="card-footer border-0 bg-transparent pt-0">
+            <a asp-controller="MovimentosMaterial" asp-action="Index" class="kpi-link" aria-label="Ver movimentos">
+              Ver mais <i class="fa-solid fa-arrow-right-long ms-1" aria-hidden="true"></i>
+            </a>
+          </div>
         </div>
       </div>
+
     </div>
 
-    <!-- Últimos movimentos -->
-    <div class="card">
-      <div class="card-header">
-        <h3 class="card-title mb-0">
-          <i class="fa-solid fa-rotate-right me-2" aria-hidden="true"></i>Últimos movimentos
-        </h3>
-      </div>
+    <!-- Linha inferior do dashboard -->
+    <div class="row mt-4 g-4">
 
-      <div class="card-body p-0">
-        <div class="table-responsive">
-          <table class="table table-sm table-striped table-hover mb-0">
-            <thead class="table-light">
-              <tr>
-                <th scope="col">Data</th>
-                <th scope="col">Obra</th>
-                <th scope="col">Material</th>
-                <th scope="col">Operação</th>
-                <th scope="col" class="text-end">Qtd</th>
-              </tr>
-            </thead>
-            <tbody>
+      <!-- CARD: Últimos movimentos -->
+      <div class="col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+          <div class="card-header bg-white border-bottom-0">
+            <h5 class="mb-0">
+              <i class="fa-solid fa-rotate-right me-2"></i>
+              Últimos movimentos
+            </h5>
+          </div>
+
+          <ul class="list-group list-group-flush">
+
             @if (!Model.UltimosMovimentos.Any())
             {
-              <tr>
-                <td colspan="5" class="text-center text-muted py-4">
-                  Sem movimentos recentes.
-                </td>
-              </tr>
+              <li class="list-group-item text-muted text-center py-4">
+                Sem movimentos registados.
+              </li>
             }
             else
             {
-              foreach (var m in Model.UltimosMovimentos)
+              foreach (var m in Model.UltimosMovimentos.Take(5))
               {
-                <tr>
-                  <td>@m.Data.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
-                  <td>@m.Obra</td>
-                  <td>@m.Material</td>
-                  <td>
-                    <span class="badge @BadgeClass(m.Operacao)">@BadgeText(m.Operacao)</span>
-                  </td>
-                  <td class="text-end">@m.Quantidade</td>
-                </tr>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <div>
+                    <div class="fw-semibold">
+                      <i class="fa-regular fa-calendar me-1"></i>
+                      @m.Data.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+                    </div>
+                    <div class="small text-muted">
+                      @m.Obra · @m.Material
+                    </div>
+                  </div>
+
+                  <div class="text-end">
+                    <span class="badge @BadgeClass(m.Operacao)">
+                      @BadgeText(m.Operacao)
+                    </span>
+                    <div class="fw-bold text-mono">@m.Quantidade</div>
+                  </div>
+                </li>
               }
             }
-            </tbody>
-          </table>
+
+          </ul>
+
+          <div class="card-footer bg-white text-end">
+            <a asp-controller="MovimentosMaterial" asp-action="Index" class="kpi-link">
+              Ver todos →
+            </a>
+          </div>
         </div>
       </div>
 
-      <div class="card-footer text-end">
-        <a class="btn btn-sm btn-outline-secondary"
-           asp-controller="MovimentosMaterial" asp-action="Index" aria-label="Ver todos os movimentos">
-          Ver todos
-        </a>
+      <!-- CARD: Obras ativas -->
+      <div class="col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+          <div class="card-header bg-white border-bottom-0">
+            <h5 class="mb-0">
+              <i class="fa-solid fa-hard-hat me-2"></i>
+              Obras ativas
+            </h5>
+          </div>
+
+          <ul class="list-group list-group-flush">
+
+            @if (!Model.ObrasResumo.Any())
+            {
+              <li class="list-group-item text-center text-muted py-4">
+                Nenhuma obra ativa.
+              </li>
+            }
+            else
+            {
+              foreach (var obra in Model.ObrasResumo)
+              {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <div>
+                    <div class="fw-semibold">@obra.Nome</div>
+                    <div class="small text-muted">
+                      @obra.Movimentos movimentos ·
+                      @obra.MateriaisDistintos materiais
+                    </div>
+                  </div>
+
+                  <a asp-controller="Obras" asp-action="Details" asp-route-id="@obra.Id"
+                    class="btn btn-sm btn-outline-primary">
+                    Abrir
+                  </a>
+                </li>
+              }
+            }
+
+          </ul>
+
+          <div class="card-footer bg-white text-end">
+            <a asp-controller="Obras" asp-action="Index" class="kpi-link">
+              Ver todas →
+            </a>
+          </div>
+        </div>
       </div>
+
+    </div>
+
+    <!-- Linha de ações globais do dashboard -->
+    <div class="mt-4 text-end">
+      <a asp-controller="Home" asp-action="ExportTudo" class="btn btn-sm btn-outline-primary">
+        <i class="fa-regular fa-file-excel me-1"></i>
+        Exportar todos os dados (Excel)
+      </a>
     </div>
 
   </div>

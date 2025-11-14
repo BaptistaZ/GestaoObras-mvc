@@ -1,7 +1,34 @@
-/* ---------------------- Preferências globais ---------------------- */
+/* ====================================================================== */
+/* ----------------------  TEMA / VARIÁVEIS GLOBAIS ---------------------- */
+/* ====================================================================== */
+
 :root {
-  color-scheme: light dark;  
+  color-scheme: light dark;
+
+  /* === Tema: TROCA ISTO para mudar o design todo === */
+  --app-bg:     #f3f4f6;  /* fundo geral da app */
+  --card-bg:    #ffffff;  /* fundo dos cards */
+  --card-border:#e5e7eb;  /* borda subtil dos cards e listas */
 }
+
+/* ====================================================================== */
+/* ---------------------- FUNDO GLOBAL DA APLICAÇÃO ---------------------- */
+/* ====================================================================== */
+
+body {
+  background-color: var(--app-bg) !important;
+}
+
+.app-main,
+.app-main .content-wrapper,
+.app-main .content-wrapper .content,
+.content-wrapper {
+  background-color: var(--app-bg) !important;
+}
+
+/* ====================================================================== */
+/* ---------------------- ACESSIBILIDADE / FOCOS ------------------------- */
+/* ====================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
   * {
@@ -12,13 +39,11 @@
   }
 }
 
-/* Estados de foco bem visíveis, sem estragar o layout */
 :focus-visible {
-  outline: 2px solid #0d6efd;         /* cor bootstrap primary */
+  outline: 2px solid #0d6efd;
   outline-offset: 2px;
 }
 
-/* Link “Saltar para o conteúdo” (skip-link) – apenas visível ao focar */
 .visually-hidden-focusable:focus {
   position: static !important;
   clip: auto !important;
@@ -28,52 +53,51 @@
   z-index: 1080;
 }
 
-/* ---------------------- SIDEBAR (AdminLTE) ---------------------- */
+/* ====================================================================== */
+/* ------------------------------- SIDEBAR ------------------------------- */
+/* ====================================================================== */
 
-/* Alinhamento de ícones e texto */
 .app-sidebar .nav-sidebar > .nav-item > .nav-link {
   display: flex;
   align-items: center;
-  gap: .75rem;               
-  padding: .625rem .875rem;  
+  gap: .75rem;
+  padding: .625rem .875rem;
 }
 
 .app-sidebar .nav-sidebar .nav-icon {
-  width: 1.35rem;            
+  width: 1.35rem;
+  font-size: 1.1rem;
   text-align: center;
-  font-size: 1.1rem;         
-  line-height: 1;            
-  margin: 0;
+  line-height: 1;
 }
 
 .app-sidebar .nav-sidebar p {
-  margin: 0;                 
+  margin: 0;
 }
 
-/* Estado ativo mais legível */
 .app-sidebar .nav-sidebar .nav-link.active {
   color: #fff;
 }
+
 .app-sidebar .nav-sidebar .nav-link.active .nav-icon {
   color: #fff;
 }
 
-/* Brand na cabeça do menu, alinhado */
 .app-sidebar .brand-link {
   display: flex;
   align-items: center;
   gap: .5rem;
 }
 
-/* Hover/focus subtil em items da sidebar (dark theme friendly) */
 .app-sidebar .nav-link:hover,
 .app-sidebar .nav-link:focus-visible {
   background: rgba(255,255,255,.08);
 }
 
-/* ---------------------- HEADER / TITULARES ---------------------- */
+/* ====================================================================== */
+/* ------------------------------- HEADER -------------------------------- */
+/* ====================================================================== */
 
-/* Espaçamento suave entre título e botão hamburguer */
 .app-page-title {
   display: inline-flex;
   align-items: center;
@@ -81,105 +105,164 @@
   line-height: 1.2;
 }
 
-/* ---------------------- SMALL-BOX (AdminLTE) ---------------------- */
+/* ====================================================================== */
+/* --------------------------- SMALL BOXES -------------------------------- */
+/* ====================================================================== */
 
-/* Evita “salto” do link no hover e reforça clicabilidade */
 .small-box .small-box-footer {
   display: inline-flex;
   align-items: center;
   gap: .5rem;
   text-decoration: none;
 }
+
 .small-box .small-box-footer:hover,
 .small-box .small-box-footer:focus {
   text-decoration: underline;
 }
 
-/* ---------------------- TABELAS & LISTAS ---------------------- */
+/* ====================================================================== */
+/* --------------------------- TABELAS & LISTAS --------------------------- */
+/* ====================================================================== */
 
-/* Ações sempre à direita, numa linha, sem quebra */
 .table .text-end.text-nowrap {
   white-space: nowrap;
 }
 
-/* Truncagem suave para colunas que podem crescer */
 .table td.truncate,
 .table th.truncate {
-  max-width: 380px;             
+  max-width: 380px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* Cabeçalhos clicáveis de ordenação – cursor e sublinhado ao passar */
 th a {
   text-decoration: none;
   cursor: pointer;
 }
+
 th a:hover,
 th a:focus-visible {
   text-decoration: underline;
 }
 
-/* ---------------------- FORMS / VALIDAÇÃO ---------------------- */
+/* ====================================================================== */
+/* ------------------------- FORMULÁRIOS --------------------------------- */
+/* ====================================================================== */
 
 input.form-control[readonly],
 input.form-control[disabled] {
   background-color: var(--bs-tertiary-bg);
 }
 
-/* Realça campos com erro da validação unobtrusive */
 .input-validation-error,
 select.input-validation-error,
 textarea.input-validation-error {
-  border-color: #dc3545;  
+  border-color: #dc3545;
 }
 
-/* Ajuda a alinhamento de labels + inputs em grids */
 .form-label {
   margin-bottom: .25rem;
 }
 
-/* Inputs de quantidade e dinheiro com largura pequena (utilitário) */
 .w-qty { width: 8ch; }
 .w-money { width: 12ch; }
 
-/* ---------------------- ALERTS ---------------------- */
+/* ====================================================================== */
+/* --------------------------- ALERTAS ----------------------------------- */
+/* ====================================================================== */
 
-/* Margem consistente quando renderizadas no topo do content */
-.alert {
-  margin-top: .25rem;
-}
-
-/* Lista dentro de alert sem margens agressivas */
+.alert { margin-top: .25rem; }
 .alert ul { margin-bottom: 0; }
 
-/* ---------------------- MODAIS ---------------------- */
+/* ====================================================================== */
+/* ---------------------------- MODAIS ----------------------------------- */
+/* ====================================================================== */
 
-/* Botões do modal: evitar colar ao bordo */
 .modal-footer .btn + .btn {
   margin-left: .5rem;
 }
 
-/* ---------------------- UTILITÁRIOS ---------------------- */
+/* ====================================================================== */
+/* --------------------------- UTILITÁRIOS --------------------------------*/
+/* ====================================================================== */
 
-/* Monoespaçado “limpo” para códigos, ids, NIF, etc. */
 .text-mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
 }
 
-/* Badge de operação coerente com os detalhes */
-.badge-op-entrada { background-color: #198754 !important; } 
-.badge-op-saida   { background-color: #dc3545 !important; } 
+.badge-op-entrada { background-color: #198754 !important; }
+.badge-op-saida   { background-color: #dc3545 !important; }
 
-/* ---------------------- RESPONSIVE ---------------------- */
+/* ====================================================================== */
+/* --------------------------- RESPONSIVE ---------------------------------*/
+/* ====================================================================== */
 
-/* Em ecrãs muito pequenos, garantimos legibilidade de células */
 @media (max-width: 420px) {
-  .table td, .table th {
-    font-size: .9rem;
-  }
-  .app-page-title {
-    font-size: 1.1rem;
-  }
+  .table td, .table th { font-size: .9rem; }
+  .app-page-title { font-size: 1.1rem; }
+}
+
+/* ====================================================================== */
+/* --------------------------- KPI CARDS ----------------------------------*/
+/* ====================================================================== */
+
+.kpi-card {
+  border-radius: 0.9rem;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+}
+
+.kpi-card .card-body {
+  padding: 1rem 1.25rem 0.75rem;
+}
+
+.kpi-card h2 {
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.kpi-card small {
+  letter-spacing: .06em;
+  font-size: .7rem;
+}
+
+/* Ícones redondos */
+.kpi-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+}
+
+/* Paletas dos KPI */
+.kpi-icon-blue  { background: #e0f2fe; color: #0d6efd; }
+.kpi-icon-green { background: #dcfce7; color: #15803d; }
+.kpi-icon-amber { background: #fef3c7; color: #b45309; }
+.kpi-icon-red   { background: #fee2e2; color: #b91c1c; }
+
+/* Links dos KPI */
+.kpi-link {
+  font-size: .85rem;
+  font-weight: 600;
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.kpi-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+/* Listas nos cards */
+.card .list-group-item {
+  border-color: var(--card-border);
+  background-color: var(--card-bg);
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
 }
