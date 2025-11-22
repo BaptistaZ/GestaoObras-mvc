@@ -74,9 +74,15 @@ GestaoObras.Web/appsettings.json
 
 dotnet ef database update
 
+Connection String:
+
+"ConnectionStrings": {
+  "DefaultConnection": "Host=localhost;Port=5432;Database=GestaoObras;Username=postgres;Password=postgres"
+}
+
 5️⃣ Executar o projeto
 
-dotnet run –project GestaoObras.Web
+dotnet run --project GestaoObras.Web 
 
 ⸻
 

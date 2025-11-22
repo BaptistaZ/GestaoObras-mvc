@@ -266,3 +266,12 @@ textarea.input-validation-error {
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
 }
+
+/* ------------------------------------------------------------------ */
+/* Esconder o cabeçalho "Gestão de Obras" com o martelo na sidebar    */
+/* (mantém o header principal em cima da página)                       */
+/* ------------------------------------------------------------------ */
+
+.app-sidebar .brand-link {
+  display: none !important;
+}
