@@ -5,10 +5,10 @@
 :root {
   color-scheme: light dark;
 
-  /* === Tema: TROCA ISTO para mudar o design todo === */
-  --app-bg:     #f3f4f6;  /* fundo geral da app */
-  --card-bg:    #ffffff;  /* fundo dos cards */
-  --card-border:#e5e7eb;  /* borda subtil dos cards e listas */
+  /* === Tema === */
+  --app-bg:     #f3f4f6;  
+  --card-bg:    #ffffff;  
+  --card-border:#e5e7eb;  
 }
 
 /* ====================================================================== */

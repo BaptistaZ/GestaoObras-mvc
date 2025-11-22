@@ -12,11 +12,9 @@ public class MaosDeObraController : Controller
 
     public MaosDeObraController(ObrasDbContext context) => _context = context;
 
-    /// <summary>
     /// Converte datas para UTC de forma robusta:
     /// - se vier default => agora (UTC)
     /// - se vier Unspecified => assume Local e converte
-    /// </summary>
     private static DateTime NormalizeToUtc(DateTime dt)
     {
         if (dt == default) return DateTime.UtcNow;

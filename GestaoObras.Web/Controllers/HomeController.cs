@@ -88,7 +88,7 @@ public class HomeController : Controller
         {
             wsObras.Cell(row, 1).Value = o.Id;
             wsObras.Cell(row, 2).Value = o.Nome;
-            wsObras.Cell(row, 3).Value = o.Descricao;          // ajusta se o nome da prop for diferente
+            wsObras.Cell(row, 3).Value = o.Descricao;          
             wsObras.Cell(row, 4).Value = o.Cliente?.Nome;
             wsObras.Cell(row, 5).Value = o.Morada;
             wsObras.Cell(row, 6).Value = o.Latitude;

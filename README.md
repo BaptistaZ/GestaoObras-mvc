@@ -58,7 +58,7 @@ Desenvolvido em C# ASP.NET Core MVC, com Entity Framework Core e PostgreSQL.
 
 1️⃣ Clonar o repositório
 
-git clone 
+git clone https://github.com/BaptistaZ/GestaoObras-mvc.git
 cd GestaoObras-mvc
 
 2️⃣ Restaurar dependências
@@ -66,19 +66,18 @@ cd GestaoObras-mvc
 dotnet restore
 
 3️⃣ Configurar a connection string
+
 Editar o ficheiro:
 
 GestaoObras.Web/appsettings.json
 
-4️⃣ Aplicar migrações da BD
-
-dotnet ef database update
-
-Connection String:
-
 "ConnectionStrings": {
   "DefaultConnection": "Host=localhost;Port=5432;Database=GestaoObras;Username=postgres;Password=postgres"
 }
+
+4️⃣ Aplicar migrações da BD
+
+dotnet ef database update
 
 5️⃣ Executar o projeto
 
